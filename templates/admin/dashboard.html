@@ -1,0 +1,980 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block topbar_title %}Admin Dashboard{% endblock %}
+
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+
+        <!-- HEADING -->
+
+        <div class="heading">
+
+            <h2>
+                Dashboard Overview
+            </h2>
+
+            <p>
+                Welcome to {{ site_name }} management system.
+            </p>
+
+        </div>
+
+
+
+        <!-- STAT CARDS -->
+
+        <div class="row g-4">
+
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon blue">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+
+                    <h3>
+                        {{ total_products }}
+                    </h3>
+
+                    <p>
+                        Total Products
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon green">
+                        <i class="bi bi-bag-check"></i>
+                    </div>
+
+                    <h3>
+                        {{ total_orders }}
+                    </h3>
+
+                    <p>
+                        Total Orders
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon purple">
+                        <i class="bi bi-people"></i>
+                    </div>
+
+                    <h3>
+                        {{ total_customers }}
+                    </h3>
+
+                    <p>
+                        Total Customers
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon orange">
+                        <i class="bi bi-currency-rupee"></i>
+                    </div>
+
+                    <h3>
+                        ₹{{ total_revenue }}
+                    </h3>
+
+                    <p>
+                        Total Revenue
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon blue">
+                        <i class="bi bi-tags"></i>
+                    </div>
+
+                    <h3>
+                        {{ total_categories }}
+                    </h3>
+
+                    <p>
+                        Total Categories
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon green">
+                        <i class="bi bi-heart"></i>
+                    </div>
+
+                    <h3>
+                        {{ total_wishlist }}
+                    </h3>
+
+                    <p>
+                        Wishlist Items
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+<!-- =====================================================
+     BUSINESS PERFORMANCE
+===================================================== -->
+
+<div class="row g-4 mt-1">
+
+
+    <!-- TODAY -->
+
+    <div class="col-lg-4">
+
+        <div class="stat-card">
+
+            <div class="stat-icon blue">
+                <i class="bi bi-calendar-day"></i>
+            </div>
+
+            <h3>
+                ₹{{ today_revenue }}
+            </h3>
+
+            <p>
+                Today's Revenue
+            </p>
+
+            <small class="text-muted">
+                {{ today_orders }} orders today
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <!-- WEEK -->
+
+    <div class="col-lg-4">
+
+        <div class="stat-card">
+
+            <div class="stat-icon green">
+                <i class="bi bi-calendar-week"></i>
+            </div>
+
+            <h3>
+                ₹{{ week_revenue }}
+            </h3>
+
+            <p>
+                This Week Revenue
+            </p>
+
+            <small class="text-muted">
+                {{ week_orders }} orders this week
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <!-- MONTH -->
+
+    <div class="col-lg-4">
+
+        <div class="stat-card">
+
+            <div class="stat-icon purple">
+                <i class="bi bi-calendar-month"></i>
+            </div>
+
+            <h3>
+                ₹{{ month_revenue }}
+            </h3>
+
+            <p>
+                This Month Revenue
+            </p>
+
+            <small class="text-muted">
+                {{ month_orders }} orders this month
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+        <!-- ANALYTICS SECTION -->
+
+        <div class="row g-4 mt-1">
+
+            <div class="col-lg-8">
+
+                <div class="dashboard-card">
+
+                    <div class="card-header-custom">
+                        <h5>Sales Analytics</h5>
+                        <small>Last 7 days performance</small>
+                    </div>
+
+                    <div class="chart-box">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-4">
+
+                <div class="dashboard-card">
+
+                    <div class="card-header-custom">
+                        <h5>Order Status</h5>
+                        <small>Current order distribution</small>
+                    </div>
+
+                    <div class="chart-box">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RECENT ORDERS -->
+
+        <div class="row">
+
+
+            <div class="col-lg-12">
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <h5>
+                            Recent Orders
+                        </h5>
+
+                        <a href="{% url 'panel_orders' %}">
+                            View All
+                        </a>
+
+                    </div>
+
+
+                    <div class="table-responsive">
+
+                        <table class="table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Order
+                                    </th>
+
+                                    <th>
+                                        Customer
+                                    </th>
+
+                                    <th>
+                                        Amount
+                                    </th>
+
+                                    <th>
+                                        Payment
+                                    </th>
+
+                                    <th>
+                                        Status
+                                    </th>
+
+                                    <th>
+                                        Date
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                {% for order in recent_orders %}
+
+                                <tr>
+
+                                    <td>
+                                        <a href="{% url 'panel_order_detail' order.id %}" class="cell-title">#{{ order.id }}</a>
+                                    </td>
+
+
+                                    <td>
+                                        {{ order.full_name }}
+                                    </td>
+
+
+                                    <td>
+                                        ₹{{ order.total_amount }}
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if order.payment_status == "Paid" %}
+
+                                        <span class="status delivered">
+                                            Paid
+                                        </span>
+
+                                        {% elif order.payment_status == "Failed" %}
+
+                                        <span class="status cancelled">
+                                            Failed
+                                        </span>
+
+                                        {% else %}
+
+                                        <span class="status pending">
+                                            Pending
+                                        </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if order.status == "Pending" %}
+
+                                        <span class="status pending">
+                                            Pending
+                                        </span>
+
+                                        {% elif order.status == "Processing" %}
+
+                                        <span class="status processing">
+                                            Processing
+                                        </span>
+
+                                        {% elif order.status == "Shipped" %}
+
+                                        <span class="status shipped">
+                                            Shipped
+                                        </span>
+
+                                        {% elif order.status == "Delivered" %}
+
+                                        <span class="status delivered">
+                                            Delivered
+                                        </span>
+
+                                        {% else %}
+
+                                        <span class="status cancelled">
+                                            Cancelled
+                                        </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+                                        {{ order.created_at|date:"d M Y" }}
+                                    </td>
+
+                                </tr>
+
+
+                                {% empty %}
+
+                                <tr>
+
+                                    <td colspan="6" class="text-center">
+
+                                        No orders available.
+
+                                    </td>
+
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- PRODUCTS -->
+
+        <div class="row">
+
+
+            <!-- TOP PRODUCTS -->
+
+            <div class="col-lg-6">
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <h5>
+                            Top Selling Products
+                        </h5>
+
+                        <a href="{% url 'panel_products' %}">
+                            Products
+                        </a>
+
+                    </div>
+
+
+                    <div class="panel-body">
+
+                        {% for product in top_products %}
+
+                        <div class="product-row">
+
+                            <div class="product-info">
+
+                                <div class="product-icon">
+
+                                    <i class="bi bi-box"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <div class="product-name">
+                                        {{ product.product__name }}
+                                    </div>
+
+                                    <div class="product-small">
+                                        Product sales
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <strong>
+                                {{ product.total_sold }} sold
+                            </strong>
+
+                        </div>
+
+                        {% empty %}
+
+                        <p class="text-muted">
+                            No sales available.
+                        </p>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- LOW STOCK -->
+
+            <div class="col-lg-6">
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <h5>
+                            Low Stock Products
+                        </h5>
+
+                        <a href="{% url 'panel_products' %}">
+                            Manage
+                        </a>
+
+                    </div>
+
+
+                    <div class="panel-body">
+
+                        {% for product in low_stock_products %}
+
+                        <div class="product-row">
+
+                            <div class="product-info">
+
+                                <div class="product-icon">
+
+                                    <i class="bi bi-exclamation-triangle"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <div class="product-name">
+                                        {{ product.name }}
+                                    </div>
+
+                                    <div class="product-small">
+                                        {{ product.category.name }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <strong class="text-danger">
+
+                                {{ product.stock }} left
+
+                            </strong>
+
+                        </div>
+
+
+                        {% empty %}
+
+                        <div class="text-center">
+
+                            <i
+                                class="bi bi-check-circle text-success"
+                                style="font-size: 35px;"
+                            ></i>
+
+                            <p class="mt-2">
+                                No low-stock products.
+                            </p>
+
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- PAYMENT -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <h5>
+                    Payment Overview
+                </h5>
+
+            </div>
+
+
+            <div class="panel-body">
+
+                <div class="row g-4 align-items-center">
+
+                    <div class="col-lg-7">
+
+                <div class="row g-3">
+
+
+                    <div class="col-md-4">
+
+                        <div class="action">
+
+                            <i class="bi bi-check-circle text-success"></i>
+
+                            <strong>
+                                {{ paid_orders }} Paid Orders
+                            </strong>
+
+                            <small>
+                                Successful payments
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="action">
+
+                            <i class="bi bi-clock text-warning"></i>
+
+                            <strong>
+                                {{ pending_payments }} Pending
+                            </strong>
+
+                            <small>
+                                Payments waiting
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="action">
+
+                            <i class="bi bi-x-circle text-danger"></i>
+
+                            <strong>
+                                {{ failed_payments }} Failed
+                            </strong>
+
+                            <small>
+                                Failed payments
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div style="position: relative; height: 220px;">
+                            <canvas id="paymentChart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- QUICK ACTIONS -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <h5>
+                    Quick Actions
+                </h5>
+
+            </div>
+
+
+            <div class="panel-body">
+
+                <div class="row g-3">
+
+
+                    <div class="col-md-3">
+
+                        <a
+                            href="{% url 'panel_product_add' %}"
+                            class="action"
+                        >
+
+                            <i class="bi bi-plus-square text-primary"></i>
+
+                            <strong>
+                                Add Product
+                            </strong>
+
+                            <small>
+                                Create new product
+                            </small>
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <a
+                            href="{% url 'panel_category_add' %}"
+                            class="action"
+                        >
+
+                            <i class="bi bi-tags text-success"></i>
+
+                            <strong>
+                                Add Category
+                            </strong>
+
+                            <small>
+                                Create category
+                            </small>
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <a
+                            href="{% url 'panel_orders' %}"
+                            class="action"
+                        >
+
+                            <i class="bi bi-bag-check text-warning"></i>
+
+                            <strong>
+                                Manage Orders
+                            </strong>
+
+                            <small>
+                                View customer orders
+                            </small>
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <a
+                            href="{% url 'home' %}"
+                            class="action"
+                        >
+
+                            <i class="bi bi-shop text-info"></i>
+
+                            <strong>
+                                View Store
+                            </strong>
+
+                            <small>
+                                Open website
+                            </small>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+
+    const labels =JSON.parse('{{ sales_labels|escapejs }}');
+    const revenue = JSON.parse('{{ sales_revenue|escapejs }}');
+    const orders = JSON.parse('{{ sales_orders|escapejs }}');
+
+    const statusLabels = JSON.parse('{{ status_labels|escapejs }}');
+    const statusData = JSON.parse('{{ status_data|escapejs }}');
+
+
+    const salesCanvas = document.getElementById('salesChart');
+
+    if (salesCanvas) {
+
+        new Chart(salesCanvas, {
+
+            type: 'line',
+
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Revenue (₹)',
+                        data: revenue,
+                        borderColor: '#9a6b3f',
+                        backgroundColor: 'rgba(154, 107, 63, 0.12)',
+                        fill: true,
+                        borderWidth: 3,
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Orders',
+                        data: orders,
+                        borderColor: '#2b211c',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        position: 'left'
+                    },
+                    y1: {
+                        beginAtZero: true,
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        ticks: { precision: 0 }
+                    }
+                }
+            }
+
+        });
+
+    }
+
+
+    const statusCanvas = document.getElementById('orderStatusChart');
+
+    if (statusCanvas) {
+
+        new Chart(statusCanvas, {
+
+            type: 'doughnut',
+
+            data: {
+                labels: statusLabels,
+                datasets: [
+                    {
+                        data: statusData,
+                        backgroundColor: [
+                            '#f59e0b',
+                            '#4a3b33',
+                            '#8b5cf6',
+                            '#10b981',
+                            '#ef4444'
+                        ],
+                        borderWidth: 2
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+
+        });
+
+    }
+
+    const paymentCanvas = document.getElementById('paymentChart');
+
+    if (paymentCanvas) {
+
+        new Chart(paymentCanvas, {
+
+            type: 'doughnut',
+
+            data: {
+                labels: JSON.parse('{{ payment_labels|escapejs }}'),
+                datasets: [
+                    {
+                        data: JSON.parse('{{ payment_data|escapejs }}'),
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 2
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' }
+                }
+            }
+
+        });
+
+    }
+
+
+</script>
+{% endblock %}

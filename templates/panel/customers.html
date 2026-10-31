@@ -1,0 +1,122 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}Customers{% endblock %}
+
+{% block head_extra %}
+<style>
+    .cust-avatar { width: 36px; height: 36px; border-radius: 50%; background: #9a6b3f; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; flex: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <h2>Customers</h2>
+        <p>{{ total_customers }} customer{{ total_customers|pluralize }} registered.</p>
+    </div>
+</div>
+
+<div class="tabs">
+    <a href="?{% if query %}q={{ query|urlencode }}&{% endif %}sort={{ sort|urlencode }}" class="{% if not state %}active{% endif %}">All</a>
+    <a href="?state=buyers{% if query %}&q={{ query|urlencode }}{% endif %}&sort={{ sort|urlencode }}" class="{% if state == 'buyers' %}active{% endif %}">Buyers</a>
+    <a href="?state=never{% if query %}&q={{ query|urlencode }}{% endif %}&sort={{ sort|urlencode }}" class="{% if state == 'never' %}active{% endif %}">Never ordered</a>
+    <a href="?state=inactive{% if query %}&q={{ query|urlencode }}{% endif %}&sort={{ sort|urlencode }}" class="{% if state == 'inactive' %}active{% endif %}">Blocked</a>
+</div>
+
+<form method="get" class="toolbar">
+    <input type="hidden" name="state" value="{{ state }}">
+
+    <div class="field grow">
+        <label for="f-q">Search</label>
+        <input type="text" id="f-q" name="q" value="{{ query }}" class="form-control" placeholder="Name, username, email">
+    </div>
+
+    <div class="field">
+        <label for="f-sort">Sort by</label>
+        <select id="f-sort" name="sort" class="form-select">
+            <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+            <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Oldest</option>
+            <option value="name" {% if sort == 'name' %}selected{% endif %}>Name</option>
+            <option value="orders" {% if sort == 'orders' %}selected{% endif %}>Most orders</option>
+            <option value="spent" {% if sort == 'spent' %}selected{% endif %}>Highest spend</option>
+        </select>
+    </div>
+
+    <div class="field">
+        <label>&nbsp;</label>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn-p"><i class="bi bi-funnel"></i> Filter</button>
+            <a href="{% url 'panel_customers' %}" class="btn-p-outline">Clear</a>
+        </div>
+    </div>
+</form>
+
+<div class="data-card">
+    {% if page_obj.object_list %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Joined</th>
+                    <th class="num">Orders</th>
+                    <th class="num">Spent</th>
+                    <th>Last order</th>
+                    <th>Status</th>
+                    <th class="actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in page_obj %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="cust-avatar">{{ u.username|slice:":1"|upper }}</span>
+                            <div>
+                                <a class="cell-title" href="{% url 'panel_customer_detail' u.id %}">{{ u.get_full_name|default:u.username }}</a>
+                                <span class="cell-sub">{{ u.email|default:"No email" }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ u.date_joined|date:"d M Y" }}</td>
+                    <td class="num">{{ u.order_count }}</td>
+                    <td class="num">₹{{ u.total_spent|default:0|floatformat:2 }}</td>
+                    <td>{% if u.last_order %}{{ u.last_order|date:"d M Y" }}{% else %}—{% endif %}</td>
+                    <td>
+                        {% if u.is_active %}<span class="badge-s badge-ok">Active</span>{% else %}<span class="badge-s badge-bad">Blocked</span>{% endif %}
+                    </td>
+                    <td class="actions">
+                        <a href="{% url 'panel_customer_detail' u.id %}" class="btn-p-outline btn-p-sm"><i class="bi bi-eye"></i> View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pager-p">
+        <span>Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
+        <div class="links">
+            {% if page_obj.has_previous %}
+            <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Prev</a>
+            {% else %}
+            <span class="pg disabled">Prev</span>
+            {% endif %}
+            <span class="pg current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+            <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+            {% else %}
+            <span class="pg disabled">Next</span>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-people"></i>
+        <p class="mb-0">No customers match your filters.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

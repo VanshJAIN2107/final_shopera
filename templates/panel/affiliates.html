@@ -1,0 +1,125 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}Affiliates{% endblock %}
+
+{% block head_extra %}
+<style>
+    .code-cell { font-family: SFMono-Regular, Consolas, Menlo, monospace; font-size: 13px; }
+    .inline-form { display: inline; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <h2>Affiliates</h2>
+        <p class="text-muted">People who promote the store with their own link and earn a commission on delivered orders.</p>
+    </div>
+</div>
+
+<div class="tabs">
+    <a href="{% url 'panel_affiliates' %}{% if query %}?q={{ query|urlencode }}{% endif %}" class="{% if not status %}active{% endif %}">All<span class="n">{{ total }}</span></a>
+    <a href="?status=Pending{% if query %}&q={{ query|urlencode }}{% endif %}" class="{% if status == 'Pending' %}active{% endif %}">Pending<span class="n">{{ counts.Pending|default:0 }}</span></a>
+    <a href="?status=Approved{% if query %}&q={{ query|urlencode }}{% endif %}" class="{% if status == 'Approved' %}active{% endif %}">Approved<span class="n">{{ counts.Approved|default:0 }}</span></a>
+    <a href="?status=Suspended{% if query %}&q={{ query|urlencode }}{% endif %}" class="{% if status == 'Suspended' %}active{% endif %}">Suspended<span class="n">{{ counts.Suspended|default:0 }}</span></a>
+</div>
+
+<form method="get" class="toolbar">
+    <input type="hidden" name="status" value="{{ status }}">
+    <div class="field grow">
+        <label for="f-q">Search</label>
+        <input type="text" id="f-q" name="q" value="{{ query }}" class="form-control" placeholder="Username, email or code">
+    </div>
+    <div class="field">
+        <label>&nbsp;</label>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn-p"><i class="bi bi-funnel"></i> Filter</button>
+            <a href="{% url 'panel_affiliates' %}" class="btn-p-outline">Clear</a>
+        </div>
+    </div>
+</form>
+
+<div class="data-card">
+    {% if page_obj.object_list %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Affiliate</th>
+                    <th>Code</th>
+                    <th>Status</th>
+                    <th class="num">Commission</th>
+                    <th class="num">Clicks</th>
+                    <th class="num">Orders</th>
+                    <th class="num">Earned</th>
+                    <th>Joined</th>
+                    <th class="actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in page_obj %}
+                <tr>
+                    <td>
+                        <a class="cell-title" href="{% url 'panel_affiliate_detail' a.id %}">{{ a.user.username }}</a>
+                        <span class="cell-sub">{{ a.user.email|default:"—" }}</span>
+                    </td>
+                    <td class="code-cell">{{ a.code }}</td>
+                    <td><span class="badge-s {% if a.status == 'Pending' %}badge-warn{% elif a.status == 'Approved' %}badge-ok{% else %}badge-bad{% endif %}">{{ a.status }}</span></td>
+                    <td class="num">{{ a.commission_percent|floatformat:"-2" }}%</td>
+                    <td class="num">{{ a.click_count }}</td>
+                    <td class="num">{{ a.order_count }}</td>
+                    <td class="num">&#8377;{{ a.earned|default:0|floatformat:2 }}</td>
+                    <td class="text-nowrap">{{ a.created_at|date:"d M Y" }}</td>
+                    <td class="actions text-nowrap">
+                        <a href="{% url 'panel_affiliate_detail' a.id %}" class="btn-p-outline btn-p-sm">View</a>
+                        {% if a.status == 'Pending' %}
+                        <form method="post" action="{% url 'panel_affiliate_quick' a.id %}" class="inline-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="approve">
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn-p btn-p-sm">Approve</button>
+                        </form>
+                        {% elif a.status == 'Approved' %}
+                        <form method="post" action="{% url 'panel_affiliate_quick' a.id %}" class="inline-form"
+                              onsubmit="return confirm('Suspend this affiliate? Their link will stop earning commission.');">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="suspend">
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn-p-danger btn-p-sm">Suspend</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pager-p">
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} ({{ page_obj.paginator.count }} affiliates)</span>
+        <div class="links">
+            {% if page_obj.has_previous %}
+                <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">&laquo; Prev</a>
+            {% else %}
+                <span class="pg disabled">&laquo; Prev</span>
+            {% endif %}
+            <span class="pg current">{{ page_obj.number }}</span>
+            {% if page_obj.has_next %}
+                <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Next &raquo;</a>
+            {% else %}
+                <span class="pg disabled">Next &raquo;</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-people"></i>
+        <p class="mb-0">{% if status or query %}No affiliates match your filters.{% else %}No one has applied to the affiliate program yet.{% endif %}</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

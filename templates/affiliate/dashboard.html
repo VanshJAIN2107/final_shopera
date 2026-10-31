@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+
+{% block title %}Affiliate Dashboard | {{ site_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+
+    .af-dash { max-width: 1180px; margin: 0 auto; padding: 30px 20px 0; }
+
+    .af-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 18px; }
+    .af-head h1 { font-size: clamp(26px, 4vw, 34px); font-weight: 800; margin: 0; }
+    .af-head small { color: var(--muted); }
+
+    .af-banner { margin-bottom: 18px; padding: 14px 18px; border-radius: 14px; font-weight: 600; font-size: 14.5px; }
+    .af-banner.is-pending { background: var(--warning-soft); color: var(--warning); border: 1px solid #f0dcaf; }
+    .af-banner.is-danger { background: var(--danger-soft); color: var(--danger); border: 1px solid #f1cbc3; }
+
+    .af-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .af-stats.is-small { grid-template-columns: repeat(3, 1fr); margin-top: 14px; }
+
+    .af-stat { padding: 20px 20px 18px; }
+    .af-stat small { display: block; color: var(--muted); font-size: 12.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+    .af-stat b { display: block; margin: 6px 0 2px; font-size: 28px; font-weight: 800; line-height: 1.15; }
+    .af-stat span { color: var(--muted); font-size: 13px; }
+    .af-stat.is-main { background: var(--primary); border-color: var(--primary); }
+    .af-stat.is-main small, .af-stat.is-main span { color: #d9cdbb; }
+    .af-stat.is-main b { color: #e8c58f; }
+    .af-stats.is-small .af-stat b { font-size: 22px; }
+
+    .af-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-top: 16px; align-items: start; }
+    .af-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+    .af-box { padding: 24px 24px 22px; min-width: 0; }
+    .af-box h2 { font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 700; margin: 0 0 14px; }
+    .af-box p.af-help { color: var(--muted); font-size: 13.5px; line-height: 1.6; margin: 10px 0 0; }
+
+    .af-copy-row { display: flex; gap: 8px; }
+    .af-copy-row input { flex: 1; min-width: 0; }
+    .af-copy-row button { flex-shrink: 0; padding: 10px 20px; }
+
+    .af-gen { margin-top: 20px; padding-top: 18px; border-top: 1px dashed var(--border-strong); }
+    .af-gen h3 { font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700; margin: 0 0 10px; }
+    .af-gen .form-select, .af-gen .form-control { margin-bottom: 8px; }
+
+    .af-chart { position: relative; height: 260px; }
+
+    .af-balance { font-size: 30px; font-weight: 800; margin: 0 0 4px; }
+
+    .af-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .af-fields .af-full { grid-column: 1 / -1; }
+    .af-fields[hidden] { display: none; }
+
+    .af-current { margin: 0 0 14px; padding: 10px 14px; border-radius: 12px; background: var(--bg-alt); font-size: 13.5px; color: #4d443d; }
+
+    .af-table-wrap { overflow-x: auto; }
+    .af-table { width: 100%; margin: 0; font-size: 14px; }
+    .af-table th, .af-table td { padding: 10px 12px; white-space: nowrap; vertical-align: middle; }
+    .af-table small { display: block; color: var(--muted); font-size: 12px; white-space: normal; }
+
+    .af-empty { padding: 26px 10px; text-align: center; color: var(--muted); font-size: 14.5px; }
+
+    .af-tables { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-top: 16px; align-items: start; }
+
+    @media (max-width: 991px) {
+        .af-stats { grid-template-columns: repeat(2, 1fr); }
+        .af-grid, .af-tables { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 520px) {
+        .af-dash { padding: 22px 12px 0; }
+        .af-stats.is-small { grid-template-columns: 1fr; }
+        .af-fields { grid-template-columns: 1fr; }
+        .af-box { padding: 20px 16px 18px; }
+        .af-stat b { font-size: 24px; }
+        .af-copy-row { flex-direction: column; }
+    }
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="af-dash">
+
+    <div class="af-head">
+        <h1>Affiliate dashboard</h1>
+        <small>Your code: <strong>{{ affiliate.code }}</strong> &middot; {{ affiliate.commission_percent|floatformat:"-2" }}% commission &middot;
+            <span class="badge-soft {% if affiliate.status == 'Approved' %}badge-success-soft{% elif affiliate.status == 'Suspended' %}badge-danger-soft{% else %}badge-warning-soft{% endif %}">{{ affiliate.status }}</span>
+        </small>
+    </div>
+
+    {% if affiliate.status == 'Pending' %}
+        <div class="af-banner is-pending">Your application is under review. Your links start earning once approved.</div>
+    {% elif affiliate.status == 'Suspended' %}
+        <div class="af-banner is-danger">Your affiliate account is suspended, so new orders will not earn commission. Please contact us if you think this is a mistake.</div>
+    {% endif %}
+
+
+    <!-- STATS -->
+
+    <div class="af-stats">
+        <div class="surface af-stat is-main"><small>Total earnings</small><b>&#8377;{{ lifetime|floatformat:2 }}</b><span>Lifetime</span></div>
+        <div class="surface af-stat"><small>Available to withdraw</small><b>&#8377;{{ available|floatformat:2 }}</b><span>Approved, not yet requested</span></div>
+        <div class="surface af-stat"><small>Pending</small><b>&#8377;{{ pending|floatformat:2 }}</b><span>Waiting for delivery</span></div>
+        <div class="surface af-stat"><small>Paid out</small><b>&#8377;{{ paid|floatformat:2 }}</b><span>Sent to you</span></div>
+    </div>
+
+    <div class="af-stats is-small">
+        <div class="surface af-stat"><small>Clicks</small><b>{{ clicks_total }}</b><span>{{ clicks_30 }} in the last 30 days</span></div>
+        <div class="surface af-stat"><small>Orders</small><b>{{ orders_total }}</b><span>Excluding cancelled</span></div>
+        <div class="surface af-stat"><small>Conversion</small><b>{{ conversion }}%</b><span>Orders per click</span></div>
+    </div>
+
+
+    <div class="af-grid">
+
+        <div class="af-col">
+
+            <!-- REFERRAL LINK -->
+
+            <div class="surface af-box" id="af-links" data-code="{{ affiliate.code }}" data-base="{{ base_url }}">
+                <h2>Your referral link</h2>
+
+                <div class="af-copy-row">
+                    <input type="text" class="form-control" id="af-ref" value="{{ ref_link }}" readonly aria-label="Your referral link">
+                    <button type="button" class="btn-theme" data-copy="af-ref">Copy</button>
+                </div>
+
+                <div class="af-gen">
+                    <h3>Link generator</h3>
+
+                    <select class="form-select" id="af-product" aria-label="Choose a product">
+                        <option value="{{ base_url }}/">Store home page</option>
+                        {% for p in products %}
+                            <option value="{{ p.url }}">{{ p.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <input type="text" class="form-control" id="af-custom" placeholder="...or paste any store page URL" aria-label="Paste a store page URL">
+
+                    <div class="af-copy-row">
+                        <input type="text" class="form-control" id="af-built" value="" readonly aria-label="Generated link">
+                        <button type="button" class="btn-theme-outline" data-copy="af-built">Copy</button>
+                    </div>
+                </div>
+
+                <p class="af-help">
+                    Visitors are tracked for {{ cookie_days }} days after they click your link.
+                    Affiliate links work only for approved accounts.
+                </p>
+            </div>
+
+
+            <!-- CHART -->
+
+            <div class="surface af-box">
+                <h2>Last 14 days</h2>
+                <div class="af-chart"><canvas id="af-chart" aria-label="Clicks and orders over the last 14 days" role="img"></canvas></div>
+            </div>
+
+        </div>
+
+
+        <div class="af-col">
+
+            <!-- REQUEST PAYOUT -->
+
+            <div class="surface af-box">
+                <h2>Request payout</h2>
+
+                <p class="af-balance">&#8377;{{ available|floatformat:2 }}</p>
+                <p class="af-help mb-3 mt-0">Available balance. Minimum payout is &#8377;{{ min_payout }}.
+                    {% if requested %}&#8377;{{ requested|floatformat:2 }} is already requested.{% endif %}</p>
+
+                <form method="post" action="{% url 'affiliate_payout_request' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-theme w-100"{% if not can_request %} disabled{% endif %}>Request payout</button>
+                </form>
+
+                {% if not can_request %}
+                    <p class="af-help">
+                        {% if not affiliate.is_approved %}
+                            Payouts open once your account is approved.
+                        {% elif not affiliate.has_payout_details %}
+                            Add your payout details below first.
+                        {% else %}
+                            You need at least &#8377;{{ min_payout }} available to request a payout.
+                        {% endif %}
+                    </p>
+                {% endif %}
+            </div>
+
+
+            <!-- PAYOUT DETAILS -->
+
+            <div class="surface af-box" id="payout-details">
+                <h2>Payout details</h2>
+
+                <p class="af-current">
+                    {% if affiliate.has_payout_details %}Current: {{ affiliate.payout_summary }}{% else %}No payout details saved yet.{% endif %}
+                </p>
+
+                <form method="post" action="{% url 'affiliate_settings' %}" id="af-details-form">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label" for="id_payout_method">Payout method</label>
+                        <select name="payout_method" id="id_payout_method" class="form-select">
+                            <option value="UPI"{% if details_form.payout_method.value != 'BANK' %} selected{% endif %}>UPI</option>
+                            <option value="BANK"{% if details_form.payout_method.value == 'BANK' %} selected{% endif %}>Bank transfer</option>
+                        </select>
+                    </div>
+
+                    <div id="af-upi-fields" class="mb-3">
+                        <label class="form-label" for="id_upi_id">UPI id</label>
+                        <input type="text" name="upi_id" id="id_upi_id" class="form-control" maxlength="80" placeholder="name@bank" value="{{ details_form.upi_id.value|default_if_none:'' }}">
+                    </div>
+
+                    <div id="af-bank-fields" class="af-fields mb-3" hidden>
+                        <div class="af-full">
+                            <label class="form-label" for="id_account_holder">Account holder name</label>
+                            <input type="text" name="account_holder" id="id_account_holder" class="form-control" maxlength="120" value="{{ details_form.account_holder.value|default_if_none:'' }}">
+                        </div>
+                        <div>
+                            <label class="form-label" for="id_bank_name">Bank name</label>
+                            <input type="text" name="bank_name" id="id_bank_name" class="form-control" maxlength="120" value="{{ details_form.bank_name.value|default_if_none:'' }}">
+                        </div>
+                        <div>
+                            <label class="form-label" for="id_ifsc">IFSC code</label>
+                            <input type="text" name="ifsc" id="id_ifsc" class="form-control" maxlength="15" placeholder="HDFC0001234" value="{{ details_form.ifsc.value|default_if_none:'' }}">
+                        </div>
+                        <div class="af-full">
+                            <label class="form-label" for="id_account_number">Account number</label>
+                            <input type="text" name="account_number" id="id_account_number" class="form-control" maxlength="24" inputmode="numeric" value="{{ details_form.account_number.value|default_if_none:'' }}">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-theme-outline w-100">Save payout details</button>
+                </form>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TABLES -->
+
+    <div class="af-tables">
+
+        <div class="surface af-box">
+            <h2>Recent commissions</h2>
+
+            {% if commissions %}
+            <div class="af-table-wrap">
+                <table class="table af-table">
+                    <thead>
+                        <tr><th>Date</th><th>Order</th><th>Order amount</th><th>Rate</th><th>Commission</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for c in commissions %}
+                        <tr>
+                            <td>{{ c.created_at|date:"d M Y" }}</td>
+                            <td>#{{ c.order_id }}</td>
+                            <td>&#8377;{{ c.order_amount|floatformat:2 }}</td>
+                            <td>{{ c.rate|floatformat:"-2" }}%</td>
+                            <td><strong>&#8377;{{ c.amount|floatformat:2 }}</strong></td>
+                            <td>
+                                <span class="badge-soft {% if c.status == 'Pending' %}badge-warning-soft{% elif c.status == 'Paid' %}badge-success-soft{% elif c.status == 'Cancelled' %}badge-danger-soft{% endif %}">{{ c.status }}</span>
+                                {% if c.note %}<small>{{ c.note }}</small>{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <div class="af-empty">No commissions yet. Share your link and your first order will show up here.</div>
+            {% endif %}
+        </div>
+
+        <div class="surface af-box">
+            <h2>Payout history</h2>
+
+            {% if payouts %}
+            <div class="af-table-wrap">
+                <table class="table af-table">
+                    <thead>
+                        <tr><th>Date</th><th>Amount</th><th>Sent to</th><th>Status</th><th>Reference</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for p in payouts %}
+                        <tr>
+                            <td>{{ p.requested_at|date:"d M Y" }}</td>
+                            <td><strong>&#8377;{{ p.amount|floatformat:2 }}</strong></td>
+                            <td>{{ p.method_summary|default:"-" }}</td>
+                            <td>
+                                <span class="badge-soft {% if p.status == 'Paid' %}badge-success-soft{% elif p.status == 'Rejected' %}badge-danger-soft{% else %}badge-warning-soft{% endif %}">{{ p.status }}</span>
+                                {% if p.note %}<small>{{ p.note }}</small>{% endif %}
+                            </td>
+                            <td>{{ p.reference|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <div class="af-empty">No payouts yet. Once you request one it will be listed here.</div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function () {
+
+    // ---------- copy buttons ----------
+    function copyText(input, btn) {
+        var text = input.value;
+        if (!text) return;
+
+        function done() {
+            var old = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(function () { btn.textContent = old; }, 1600);
+        }
+
+        function fallback() {
+            input.focus();
+            input.select();
+            try { document.execCommand('copy'); done(); } catch (e) {}
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(done, fallback);
+        } else {
+            fallback();
+        }
+    }
+
+    document.querySelectorAll('[data-copy]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            copyText(document.getElementById(btn.getAttribute('data-copy')), btn);
+        });
+    });
+
+    // ---------- link generator ----------
+    var box = document.getElementById('af-links');
+    var select = document.getElementById('af-product');
+    var custom = document.getElementById('af-custom');
+    var built = document.getElementById('af-built');
+
+    function buildLink() {
+        var code = box.getAttribute('data-code');
+        var url = (custom.value || '').trim() || select.value;
+
+        // drop any #fragment, then any old ref= param, so it is always ours
+        var hash = '';
+        var h = url.indexOf('#');
+        if (h > -1) { hash = url.slice(h); url = url.slice(0, h); }
+
+        url = url.replace(/([?&])ref=[^&]*&?/, '$1').replace(/[?&]$/, '');
+
+        built.value = url + (url.indexOf('?') > -1 ? '&' : '?') + 'ref=' + encodeURIComponent(code) + hash;
+    }
+
+    select.addEventListener('change', function () { custom.value = ''; buildLink(); });
+    custom.addEventListener('input', buildLink);
+    buildLink();
+
+    // ---------- payout method toggle ----------
+    var method = document.getElementById('id_payout_method');
+    var upi = document.getElementById('af-upi-fields');
+    var bank = document.getElementById('af-bank-fields');
+
+    function toggleMethod() {
+        var isBank = method.value === 'BANK';
+        upi.hidden = isBank;
+        bank.hidden = !isBank;
+    }
+
+    method.addEventListener('change', toggleMethod);
+    toggleMethod();
+
+    // ---------- chart ----------
+    if (window.Chart) {
+        var styles = getComputedStyle(document.documentElement);
+        var accent = styles.getPropertyValue('--accent').trim() || '#b8864b';
+        var primary = styles.getPropertyValue('--primary').trim() || '#3b2f2a';
+        var grid = styles.getPropertyValue('--border').trim() || '#e8dfd0';
+
+        new Chart(document.getElementById('af-chart'), {
+            type: 'bar',
+            data: {
+                labels: JSON.parse('{{ chart_labels|escapejs }}'),
+                datasets: [
+                    {
+                        label: 'Clicks',
+                        data: JSON.parse('{{ chart_clicks|escapejs }}'),
+                        backgroundColor: accent,
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Orders',
+                        data: JSON.parse('{{ chart_orders|escapejs }}'),
+                        backgroundColor: primary,
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: grid } }
+                }
+            }
+        });
+    }
+
+})();
+</script>
+{% endblock %}

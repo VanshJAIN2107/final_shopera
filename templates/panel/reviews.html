@@ -1,0 +1,106 @@
+{% extends 'panel/base.html' %}
+
+{% block head_extra %}
+<style>
+    .stars { color: #d99a2b; letter-spacing: 1px; white-space: nowrap; font-size: 15px; }
+    .review-text { max-width: 420px; white-space: normal; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <h2>Reviews</h2>
+        <p>
+            {% if average_rating %}
+                &#9733; {{ average_rating }} average from {{ total_reviews }} review{{ total_reviews|pluralize }}
+            {% else %}
+                No reviews yet.
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<div class="tabs">
+    <a href="?{% if query %}q={{ query|urlencode }}{% endif %}" class="{% if not rating %}active{% endif %}">All</a>
+    {% for n in '54321' %}
+    <a href="?rating={{ n }}{% if query %}&q={{ query|urlencode }}{% endif %}" class="{% if rating == n %}active{% endif %}">{{ n }} star{% if n != '1' %}s{% endif %}</a>
+    {% endfor %}
+</div>
+
+<form method="get" class="toolbar">
+    {% if rating %}<input type="hidden" name="rating" value="{{ rating }}">{% endif %}
+    <div class="field grow">
+        <label for="q">Search</label>
+        <input type="text" id="q" name="q" value="{{ query }}" class="form-control" placeholder="Product, customer, title or comment">
+    </div>
+    <button type="submit" class="btn-p"><i class="bi bi-funnel"></i> Filter</button>
+    {% if query or rating %}<a href="{% url 'panel_reviews' %}" class="btn-p-outline">Clear</a>{% endif %}
+</form>
+
+<div class="data-card">
+    {% if page_obj.object_list %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Product</th>
+                    <th>Rating</th>
+                    <th>Review</th>
+                    <th>Date</th>
+                    <th class="actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in page_obj %}
+                <tr>
+                    <td><a class="cell-title" href="{% url 'panel_customer_detail' r.user.id %}">{{ r.user.username }}</a></td>
+                    <td><a class="cell-title" href="{{ r.product.get_absolute_url }}" target="_blank" rel="noopener">{{ r.product.name }}</a></td>
+                    <td><span class="stars" title="{{ r.rating }} out of 5">{% for i in '12345' %}{% if forloop.counter <= r.rating %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}</span></td>
+                    <td class="review-text">
+                        {% if r.title %}<strong>{{ r.title }}</strong>{% endif %}
+                        {% if r.comment %}<span class="cell-sub" style="font-size:13px;color:#4b5563;">{{ r.comment|truncatewords:40 }}</span>{% endif %}
+                    </td>
+                    <td class="text-nowrap">{{ r.created_at|date:"d M Y" }}</td>
+                    <td class="actions">
+                        <form method="post" action="{% url 'panel_review_delete' r.id %}" onsubmit="return confirm('Delete this review? This cannot be undone.')">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn-p-danger btn-p-sm"><i class="bi bi-trash"></i> Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pager-p">
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} ({{ page_obj.paginator.count }} reviews)</span>
+        <div class="links">
+            {% if page_obj.has_previous %}
+                <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">&laquo; Prev</a>
+            {% else %}
+                <span class="pg disabled">&laquo; Prev</span>
+            {% endif %}
+            <span class="pg current">{{ page_obj.number }}</span>
+            {% if page_obj.has_next %}
+                <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Next &raquo;</a>
+            {% else %}
+                <span class="pg disabled">Next &raquo;</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-star"></i>
+        <p class="mb-0">{% if query or rating %}No reviews match your filters.{% else %}No customer reviews yet.{% endif %}</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

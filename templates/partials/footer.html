@@ -1,0 +1,110 @@
+<!-- promise strip -->
+
+<section class="promise-strip">
+    <div class="container">
+        <div class="promise-grid">
+
+            <div class="promise">
+                <span class="promise-ico">🚚</span>
+                <div><strong>Free delivery</strong><small>On every order, all over India</small></div>
+            </div>
+
+            <div class="promise">
+                <span class="promise-ico">🔒</span>
+                <div><strong>Secure payments</strong><small>UPI, cards via Razorpay</small></div>
+            </div>
+
+            <div class="promise">
+                <span class="promise-ico">↩️</span>
+                <div><strong>Easy returns</strong><small>7 day return on delivered orders</small></div>
+            </div>
+
+            <div class="promise">
+                <span class="promise-ico">💵</span>
+                <div><strong>Cash on delivery</strong><small>Pay when it reaches you</small></div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<footer class="site-footer">
+    <div class="container">
+
+        <div class="row g-4 footer-cols">
+
+            <!-- ABOUT -->
+
+            <div class="col-12 col-md-6 col-lg-3">
+
+                <a class="footer-brand" href="{% url 'home' %}">
+                    {% include 'partials/logo.html' %}
+                    <span>{{ site_name }}<em>.</em></span>
+                </a>
+
+                <p class="footer-about">Quality products at fair prices, delivered free to your door.</p>
+
+            </div>
+            <!-- SHOP -->
+
+            <div class="col-6 col-md-6 col-lg-3">
+                <h6>Shop</h6>
+                <ul>
+                    <li><a href="{% url 'products' %}">All products</a></li>
+                    <li><a href="{% url 'products' %}?deals=1">Today's deals</a></li>
+                    {% for c in nav_categories|slice:":5" %}
+                        <li><a href="{% url 'products' %}?category={{ c.slug }}">{{ c.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- HELP -->
+
+            <div class="col-6 col-md-6 col-lg-3">
+                <h6>Help &amp; info</h6>
+                <ul>
+                    <li><a href="{% url 'about' %}">About us</a></li>
+                    <li><a href="{% url 'contact' %}">Contact us</a></li>
+                    <li><a href="{% url 'affiliate_landing' %}">Affiliate program</a></li>
+                    <li><a href="{% url 'returns' %}">Returns &amp; refunds</a></li>
+                    <li><a href="{% url 'privacy' %}">Privacy policy</a></li>
+                    <li><a href="{% url 'terms' %}">Terms &amp; conditions</a></li>
+                </ul>
+            </div>
+
+            <!-- ACCOUNT -->
+
+            <div class="col-6 col-md-6 col-lg-3">
+                <h6>Your account</h6>
+                <ul>
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'profile' %}">Profile</a></li>
+                        <li><a href="{% url 'my_orders' %}">Orders</a></li>
+                        <li><a href="{% url 'wishlist' %}">Wishlist</a></li>
+                        <li><a href="{% url 'cart' %}">Cart</a></li>
+                        <li>
+                            <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="footer-linkbtn">Sign out</button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li><a href="{% url 'login' %}">Sign in</a></li>
+                        <li><a href="{% url 'register' %}">Create account</a></li>
+                        <li><a href="{% url 'cart' %}">Cart</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <small>© 2026 {{ site_name }}. All rights reserved.</small>
+            <small class="footer-made">Shop smart. Live better.</small>
+        </div>
+
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

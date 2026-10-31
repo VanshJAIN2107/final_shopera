@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}My Account | {{ site_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .acct-wrap { max-width: 1100px; margin: 0 auto; padding: 36px 16px 0; }
+    .acct-grid { display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start; }
+    .side-card { padding: 28px 22px; text-align: center; }
+    .avatar {
+        width: 84px; height: 84px; margin: 0 auto 12px; border-radius: 50%;
+        background: var(--primary); color: #fff; font-family: 'Playfair Display', Georgia, serif;
+        font-size: 38px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    }
+    .side-links { margin-top: 20px; text-align: left; }
+    .side-links a {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 12px 14px; margin-top: 8px; border: 1px solid var(--border); border-radius: 12px;
+        color: var(--text); text-decoration: none; font-weight: 600; font-size: 14px;
+    }
+    .side-links a:hover { background: var(--bg-alt); border-color: var(--border-strong); }
+    .side-links .badge-soft { padding: 2px 10px; }
+    .panel { padding: 28px; margin-bottom: 24px; }
+    .panel h3 { font-size: 22px; margin-bottom: 18px; }
+    .field-hint { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    @media (max-width: 860px) { .acct-grid { grid-template-columns: 1fr; } .panel { padding: 20px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="acct-wrap">
+    <h1 class="mb-4" style="font-size:32px;font-weight:800;">My Account</h1>
+
+    <div class="acct-grid">
+
+        <aside class="surface side-card">
+            <div class="avatar">{{ user.username|slice:":1"|upper }}</div>
+            <h3 class="mb-0" style="font-size:20px;">{{ user.username }}</h3>
+            {% if user.email %}<div class="text-muted small">{{ user.email }}</div>{% endif %}
+
+            <div class="side-links">
+                <a href="{% url 'my_orders' %}"><span>My orders</span><span class="badge-soft">{{ order_count }}</span></a>
+                <a href="{% url 'wishlist' %}"><span>Wishlist</span><span class="badge-soft">{{ wishlist_count }}</span></a>
+                <a href="{% url 'address_list' %}"><span>Saved addresses</span><span class="badge-soft">{{ address_count }}</span></a>
+            </div>
+        </aside>
+
+        <div>
+
+            <section class="surface panel">
+                <h3>Your details</h3>
+                <form method="POST" action="{% url 'profile' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="details">
+
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" value="{{ user.username }}" readonly disabled>
+                        <div class="field-hint">Username cannot be changed.</div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label class="form-label" for="first_name">First name</label>
+                            <input type="text" id="first_name" name="first_name" class="form-control" value="{{ user.first_name }}" maxlength="150">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label" for="last_name">Last name</label>
+                            <input type="text" id="last_name" name="last_name" class="form-control" value="{{ user.last_name }}" maxlength="150">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" for="email">Email</label>
+                        <input type="email" id="email" name="email" class="form-control" value="{{ user.email }}" required>
+                    </div>
+
+                    <button type="submit" class="btn-theme">Save details</button>
+                </form>
+            </section>
+
+            <section class="surface panel">
+                <h3>Change password</h3>
+
+                {% if password_form.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="mb-0 ps-3">
+                            {% for field in password_form %}{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}{% endfor %}
+                            {% for e in password_form.non_field_errors %}<li>{{ e }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <form method="POST" action="{% url 'profile' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="password">
+
+                    <div class="mb-3">
+                        <label class="form-label" for="old_password">Current password</label>
+                        <input type="password" id="old_password" name="old_password" class="form-control" autocomplete="current-password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="new_password1">New password</label>
+                        <input type="password" id="new_password1" name="new_password1" class="form-control" autocomplete="new-password" required>
+                        <div class="field-hint">At least 8 characters, not too common, not only numbers.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label" for="new_password2">Confirm new password</label>
+                        <input type="password" id="new_password2" name="new_password2" class="form-control" autocomplete="new-password" required>
+                    </div>
+
+                    <button type="submit" class="btn-theme">Update password</button>
+                </form>
+            </section>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

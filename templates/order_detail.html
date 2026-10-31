@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Order #{{ order.id }} | {{ site_name }}</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        .order-container {
+            padding-top: 48px;
+            padding-bottom: 70px;
+        }
+
+        .order-title {
+            font-size: clamp(2rem, 4vw, 2.6rem);
+            font-weight: 800;
+        }
+
+        .order-title span { color: var(--accent); }
+
+        .placed-date { color: var(--muted); }
+
+        .box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+
+        .box hr {
+            border: 0;
+            border-top: 1px solid var(--border);
+            opacity: 1;
+            margin: 16px 0;
+        }
+
+        /* PRODUCTS */
+
+        .product-row { border-bottom: 1px solid var(--border); }
+
+        .product-row:last-child { border-bottom: 0; }
+
+        .product-img {
+            height: 80px;
+            width: 80px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .no-image {
+            height: 80px;
+            width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 28px;
+        }
+
+        .product-name  { font-weight: 700; color: var(--text); }
+        .product-info  { color: var(--muted); }
+        .product-total { color: var(--primary); font-weight: 800; font-size: 1.05rem; }
+
+        /* ADDRESS */
+
+        .address-name { font-weight: 800; font-size: 1.05rem; color: var(--primary); }
+        .address-text { color: var(--muted); }
+
+        /* SUMMARY */
+
+        .summary-card {
+            position: sticky;
+            top: 100px;
+        }
+
+        .summary-line  { color: var(--muted); }
+        .summary-value { font-weight: 700; }
+
+        .total-price {
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        /* STATUS PILLS */
+
+        .status {
+            display: inline-block;
+            padding: 7px 15px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            border: 1px solid transparent;
+        }
+
+        .pending    { background: var(--warning-soft); color: var(--warning); border-color: #f0dcaf; }
+        .processing { background: var(--accent-soft);  color: #8a5f2c;        border-color: #ecd9b8; }
+        .shipped    { background: #e8eef4;             color: #3f5a73;        border-color: #cfdae5; }
+        .delivered  { background: var(--success-soft); color: var(--success); border-color: #c4e3d2; }
+        .cancelled  { background: var(--danger-soft);  color: var(--danger);  border-color: #f1cbc3; }
+
+        /* TIMELINE */
+
+        .tl { display: flex; list-style: none; margin: 0; padding: 0; }
+        .tl li { flex: 1; position: relative; text-align: center; font-size: 13px; color: var(--muted); }
+        .tl li::before {
+            content: ""; position: absolute; top: 13px; left: -50%; width: 100%; height: 3px;
+            background: var(--border-strong); z-index: 0;
+        }
+        .tl li:first-child::before { display: none; }
+        .tl li.done::before { background: var(--success); }
+        .tl .dot {
+            position: relative; z-index: 1; display: flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; margin: 0 auto 8px; border-radius: 50%;
+            background: #fff; border: 3px solid var(--border-strong); font-size: 13px; font-weight: 700; color: #fff;
+        }
+        .tl li.done .dot { background: var(--success); border-color: var(--success); }
+        .tl li.current .dot { box-shadow: 0 0 0 5px var(--success-soft); }
+        .tl li.current { color: var(--text); font-weight: 700; }
+        .tl li.done { color: var(--text); }
+        .tl li.cancelled .dot { background: var(--danger); border-color: var(--danger); box-shadow: 0 0 0 5px var(--danger-soft); }
+        .tl li.cancelled { color: var(--danger); font-weight: 700; }
+        .tl li.cancelled::before { background: var(--danger); }
+
+        @media (max-width: 575px) {
+            .tl { flex-direction: column; gap: 0; }
+            .tl li { display: flex; align-items: center; gap: 12px; text-align: left; padding-bottom: 18px; }
+            .tl li:last-child { padding-bottom: 0; }
+            .tl li::before { top: -50%; left: 13px; width: 3px; height: 100%; }
+            .tl li:first-child::before { display: none; }
+            .tl .dot { margin: 0; flex-shrink: 0; }
+        }
+
+        .return-item { padding: 10px 0; border-top: 1px solid var(--border); font-size: 14px; }
+
+        @media (max-width: 991px) {
+            .summary-card { position: static; }
+        }
+
+        @media (max-width: 768px) {
+            .order-container { padding-top: 32px; }
+        }
+
+    </style>
+
+{% include 'partials/theme.html' %}
+</head>
+
+
+<body>
+
+
+<!-- NAVBAR -->
+
+{% include 'partials/navbar.html' with active='orders' %}
+
+
+<!-- MAIN -->
+
+<div class="container order-container">
+
+
+    <!-- HEADER -->
+
+    <div class="mb-4">
+
+        <h1 class="order-title">
+            Order <span>#{{ order.id }}</span>
+        </h1>
+
+        <p class="placed-date mb-0">
+            Placed on
+            {{ order.created_at|date:"d M Y, h:i A" }}
+        </p>
+
+    </div>
+
+
+    {% if timeline %}
+    <div class="box mb-4">
+        <div class="p-4">
+            <h4 class="section-title mb-4">🚚 Order Tracking</h4>
+            <ol class="tl">
+                {% for step in timeline %}
+                <li class="{% if step.done %}done{% endif %}{% if step.current %} current{% endif %}{% if step.label == 'Cancelled' %} cancelled{% endif %}">
+                    <span class="dot">{% if step.label == 'Cancelled' %}&#10005;{% elif step.done %}&#10003;{% endif %}</span>
+                    <span>{{ step.label }}</span>
+                </li>
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+    {% endif %}
+
+
+    <div class="row g-4">
+
+
+        <!-- LEFT -->
+
+        <div class="col-lg-8">
+
+
+            <!-- ORDER ITEMS -->
+
+            <div class="box mb-4">
+
+                <div class="p-4">
+
+                    <h4 class="section-title mb-3">
+                        📦 Order Items
+                    </h4>
+
+
+                    {% for item in order.items.all %}
+
+                        <div class="product-row py-3">
+
+                            <div class="row align-items-center g-3">
+
+
+                                <!-- IMAGE -->
+
+                                <div class="col-3 col-md-2">
+
+                                    {% if item.product.image %}
+
+                                        <img
+                                            src="{{ item.product.image.url }}"
+                                            class="product-img"
+                                            alt="{{ item.product.name }}"
+                                        >
+
+                                    {% else %}
+
+                                        <div class="no-image">
+                                            📦
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <!-- PRODUCT -->
+
+                                <div class="col-6 col-md-5">
+
+                                    <div class="product-name">
+                                        {{ item.product.name }}
+                                    </div>
+
+                                    <small class="product-info">
+                                        ₹{{ item.price }}
+                                        ×
+                                        {{ item.quantity }}
+                                    </small>
+
+                                    {% if order.status == 'Delivered' %}
+                                        <a href="{{ item.product.get_absolute_url }}#reviews" class="d-inline-block mt-1 small fw-semibold">★ Write a review</a>
+                                    {% endif %}
+
+                                </div>
+
+
+                                <!-- TOTAL -->
+
+                                <div class="col-3 col-md-5 text-end">
+
+                                    <span class="product-total">
+                                        ₹{{ item.total_price }}
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+            <!-- ADDRESS -->
+
+            <div class="box">
+
+                <div class="p-4">
+
+                    <h4 class="section-title">
+                        📍 Delivery Address
+                    </h4>
+
+                    <hr>
+
+
+                    <div class="address-name">
+                        {{ order.full_name }}
+                    </div>
+
+                    <div class="address-text mt-2">
+                        {{ order.phone }}
+                    </div>
+
+                    <div class="address-text mt-1">
+                        {{ order.full_address }}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- RIGHT -->
+
+        <div class="col-lg-4">
+
+            <div class="box summary-card">
+
+                <div class="p-4">
+
+                    <h4 class="section-title">
+                        🧾 Order Summary
+                    </h4>
+
+                    <hr>
+
+
+                    <!-- BREAKDOWN -->
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="summary-line">Subtotal</span>
+                        <span class="summary-value">₹{{ order.subtotal|floatformat:2 }}</span>
+                    </div>
+
+                    {% if order.discount_amount > 0 %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="summary-line">Coupon discount{% if order.coupon_code %} ({{ order.coupon_code }}){% endif %}</span>
+                        <span class="summary-value text-success">&minus;₹{{ order.discount_amount|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="summary-line">Delivery</span>
+                        <span class="summary-value text-success">FREE</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3 mb-4 pt-3" style="border-top:1px solid var(--border)">
+                        <span class="summary-line">Total</span>
+                        <span class="total-price">₹{{ order.total_amount }}</span>
+                    </div>
+
+
+                    <!-- PAYMENT -->
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+
+                        <span class="summary-line">
+                            Payment
+                        </span>
+
+                        <span>
+                            <span class="badge-soft">{{ order.get_payment_method_display }}</span>
+                            <span class="badge-soft {% if order.payment_status == 'Paid' %}badge-success-soft{% elif order.payment_status == 'Failed' %}badge-danger-soft{% else %}badge-warning-soft{% endif %}">{{ order.payment_status }}</span>
+                        </span>
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="mb-4">
+
+                        <span class="summary-line d-block mb-2">
+                            Order Status
+                        </span>
+
+
+                        {% if order.status == "Delivered" %}
+
+                            <span class="status delivered">
+                                ✓ Delivered
+                            </span>
+
+
+                        {% elif order.status == "Cancelled" %}
+
+                            <span class="status cancelled">
+                                ✕ Cancelled
+                            </span>
+
+
+                        {% elif order.status == "Shipped" %}
+
+                            <span class="status shipped">
+                                🚚 Shipped
+                            </span>
+
+
+                        {% elif order.status == "Processing" %}
+
+                            <span class="status processing">
+                                ⚙ Processing
+                            </span>
+
+
+                        {% else %}
+
+                            <span class="status pending">
+                                ⏳ Pending
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <hr>
+
+                    <div class="d-grid gap-2">
+
+                        <a href="{% url 'invoice' order.id %}" target="_blank" rel="noopener" class="btn-theme-outline">
+                            📄 Download invoice
+                        </a>
+
+                        {% if order.can_cancel %}
+                        <form method="POST" action="{% url 'cancel_order' order.id %}" onsubmit="return confirm('Cancel this order?');" class="m-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger w-100 rounded-pill">Cancel order</button>
+                        </form>
+                        {% endif %}
+
+                        {% if can_return %}
+                        <button class="btn-theme-outline" type="button" data-bs-toggle="collapse" data-bs-target="#returnForm" aria-expanded="false">
+                            ↩ Return / replace items
+                        </button>
+                        <div class="collapse" id="returnForm">
+                            <form method="POST" action="{% url 'request_return' order.id %}" class="m-0">
+                                {% csrf_token %}
+                                <textarea name="reason" class="form-control mb-2" rows="3" placeholder="Tell us why you want to return or replace" required></textarea>
+                                <button type="submit" class="btn-theme w-100">Submit request</button>
+                            </form>
+                        </div>
+                        {% endif %}
+
+                        <a href="{% url 'home' %}" class="btn-theme">
+                            🛍️ Continue Shopping
+                        </a>
+
+                    </div>
+
+                    {% if return_requests %}
+                    <hr>
+                    <div class="section-title" style="font-size:1rem">Return requests</div>
+                    {% for r in return_requests %}
+                    <div class="return-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="az-meta">{{ r.created_at|date:"d M Y" }}</span>
+                            <span class="badge-soft {% if r.status == 'Approved' or r.status == 'Refunded' %}badge-success-soft{% elif r.status == 'Rejected' %}badge-danger-soft{% else %}badge-warning-soft{% endif %}">{{ r.status }}</span>
+                        </div>
+                        <div class="mt-1">{{ r.reason }}</div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<!-- FOOTER -->
+
+{% include 'partials/footer.html' %}
+
+
+</body>
+
+</html>

@@ -1,0 +1,166 @@
+{% extends 'panel/base.html' %}
+
+{% block head_extra %}
+<style>
+    .pf-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 28px; }
+    @media (max-width: 900px) { .pf-grid { grid-template-columns: 1fr; } }
+    .pf-field { margin-bottom: 16px; }
+    .pf-preview { width: 90px; height: 90px; object-fit: cover; border-radius: 10px; border: 1px solid #e8dfd0; background: #f3ece1; }
+    .pf-gallery { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; }
+    .pf-gallery figure { margin: 0; text-align: center; font-size: 12px; }
+    .pf-gallery img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #e8dfd0; display: block; margin-bottom: 4px; }
+    .pf-hint { color: #2f7d5b; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <h2>{% if product %}Edit product{% else %}Add product{% endif %}</h2>
+        <p>{% if product %}{{ product.name }}{% else %}Create a new product for your store{% endif %}</p>
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="data-card form-card">
+    {% csrf_token %}
+    <div class="data-card-body">
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="pf-grid">
+
+            <div>
+                <div class="pf-field">
+                    <label class="form-label" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                    {{ form.name }}
+                    {{ form.name.errors }}
+                </div>
+
+                <div class="pf-field">
+                    <label class="form-label" for="{{ form.slug.id_for_label }}">{{ form.slug.label }}</label>
+                    {{ form.slug }}
+                    {% if form.slug.help_text %}<span class="help">{{ form.slug.help_text }}</span>{% endif %}
+                    {{ form.slug.errors }}
+                </div>
+
+                <div class="pf-field">
+                    <label class="form-label" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+                    {{ form.category }}
+                    {{ form.category.errors }}
+                </div>
+
+                <div class="pf-field">
+                    <label class="form-label" for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                    {{ form.description }}
+                    {% if form.description.help_text %}<span class="help">{{ form.description.help_text }}</span>{% endif %}
+                    {{ form.description.errors }}
+                </div>
+            </div>
+
+            <div>
+                <div class="pf-field">
+                    <label class="form-label" for="{{ form.price.id_for_label }}">{{ form.price.label }} (&#8377;)</label>
+                    {{ form.price }}
+                    {{ form.price.errors }}
+                </div>
+
+                <div class="pf-field">
+                    <label class="form-label" for="{{ form.mrp.id_for_label }}">{{ form.mrp.label }} (&#8377;)</label>
+                    {{ form.mrp }}
+                    {% if form.mrp.help_text %}<span class="help">{{ form.mrp.help_text }}</span>{% endif %}
+                    <span class="help pf-hint" id="discountHint"></span>
+                    {{ form.mrp.errors }}
+                </div>
+
+                <div class="pf-field">
+                    <label class="form-label" for="{{ form.stock.id_for_label }}">{{ form.stock.label }}</label>
+                    {{ form.stock }}
+                    {{ form.stock.errors }}
+                </div>
+
+                <div class="pf-field">
+                    <div class="form-check form-switch">
+                        {{ form.is_available }}
+                        <label class="form-check-label" for="{{ form.is_available.id_for_label }}">Visible in the store</label>
+                    </div>
+                    {% if form.is_available.help_text %}<span class="help">{{ form.is_available.help_text }}</span>{% endif %}
+                    {{ form.is_available.errors }}
+                </div>
+
+                <div class="pf-field">
+                    <label class="form-label" for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>
+                    {% if product and product.image %}
+                    <div class="mb-2"><img src="{{ product.image.url }}" alt="" class="pf-preview"></div>
+                    {% endif %}
+                    {{ form.image }}
+                    {% if form.image.help_text %}<span class="help">{{ form.image.help_text }}</span>{% endif %}
+                    {{ form.image.errors }}
+                </div>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <h5 class="mb-3" style="font-size:16px;font-weight:700;">Gallery images</h5>
+
+        {% if gallery %}
+        <div class="pf-gallery">
+            {% for g in gallery %}
+            <figure>
+                <img src="{{ g.image.url }}" alt="">
+                <label><input type="checkbox" name="delete_gallery" value="{{ g.id }}"> Remove</label>
+            </figure>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="pf-field">
+            <label class="form-label" for="{{ form.gallery.id_for_label }}">{% if gallery %}Add more images{% else %}{{ form.gallery.label }}{% endif %}</label>
+            {{ form.gallery }}
+            {% if form.gallery.help_text %}<span class="help">{{ form.gallery.help_text }}</span>{% endif %}
+            {{ form.gallery.errors }}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-p">Save product</button>
+            {% if not product %}
+            <button type="submit" name="save_and_add" value="1" class="btn-p-outline">Save &amp; add another</button>
+            {% endif %}
+            <a href="{% url 'panel_products' %}" class="btn-p-outline">Cancel</a>
+            {% if product %}
+            <a href="{{ product.get_absolute_url }}" target="_blank" rel="noopener" class="btn-p-outline"><i class="bi bi-box-arrow-up-right"></i> View on store</a>
+            {% endif %}
+        </div>
+
+    </div>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
+        var price = document.getElementById('{{ form.price.id_for_label }}');
+        var mrp = document.getElementById('{{ form.mrp.id_for_label }}');
+        var hint = document.getElementById('discountHint');
+        if (!price || !mrp || !hint) return;
+
+        function update() {
+            var p = parseFloat(price.value), m = parseFloat(mrp.value);
+            if (m > p && p >= 0) {
+                hint.textContent = 'Customers will see ' + Math.round((m - p) / m * 100) + '% off';
+            } else {
+                hint.textContent = '';
+            }
+        }
+
+        price.addEventListener('input', update);
+        mrp.addEventListener('input', update);
+        update();
+    })();
+</script>
+{% endblock %}

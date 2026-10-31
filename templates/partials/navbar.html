@@ -1,0 +1,313 @@
+{% include 'partials/intro.html' %}
+
+{% comment %} Shared header. Use: {% include "partials/navbar.html" with active="products" %} {% endcomment %}
+
+<div class="annc">
+    <div class="container">Free delivery on every order &nbsp;·&nbsp; Cash on delivery available &nbsp;·&nbsp; 7 day easy returns</div>
+</div>
+
+<header class="site-header" id="siteHeader">
+
+    <div class="hd-inner">
+
+        <!-- left: menu (mobile) + main links (desktop) -->
+
+        <div class="hd-left">
+
+            <button type="button" class="hd-icon hd-burger" id="hdBurger" aria-label="Open menu" aria-expanded="false">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+            </button>
+
+            <nav class="hd-nav" aria-label="Main">
+
+                <a href="{% url 'products' %}" class="{% if active == 'products' %}is-active{% endif %}">Shop</a>
+
+                <div class="hd-mega-wrap" id="megaWrap">
+                    <button type="button" class="hd-navbtn" id="megaBtn" aria-expanded="false" aria-controls="megaPanel">
+                        Categories
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+
+                    <div class="hd-mega" id="megaPanel">
+                        <div class="hd-mega-grid">
+                            {% for c in nav_categories %}
+                                <a href="{% url 'products' %}?category={{ c.slug }}">{{ c.name }}</a>
+                            {% endfor %}
+                        </div>
+                        <div class="hd-mega-foot">
+                            <a href="{% url 'products' %}">Shop everything &rarr;</a>
+                            <a href="{% url 'products' %}?deals=1">Today's deals &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{% url 'products' %}?deals=1">Deals</a>
+                <a href="{% url 'about' %}">About</a>
+
+            </nav>
+
+        </div>
+
+        <!-- centre: brand -->
+
+        <a class="hd-brand" href="{% url 'home' %}">
+            {% include 'partials/logo.html' %}
+            <span class="hd-brand-text">{{ site_name }}<em>.</em></span>
+        </a>
+
+        <!-- right: tools -->
+
+        <div class="hd-tools">
+
+            <button type="button" class="hd-icon" id="hdSearchBtn" aria-label="Search" aria-expanded="false" aria-controls="hdSearch">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            </button>
+
+            <a class="hd-icon d-none d-sm-inline-flex {% if active == 'wishlist' %}is-active{% endif %}" href="{% url 'wishlist' %}" aria-label="Wishlist" title="Wishlist">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+                {% if nav_wishlist_count %}<span class="hd-badge">{{ nav_wishlist_count }}</span>{% endif %}
+            </a>
+
+            {% if user.is_authenticated %}
+
+                <div class="dropdown d-none d-lg-block">
+                    <button class="hd-icon hd-user dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account">
+                        <span class="hd-avatar">{{ user.username|slice:":1"|upper }}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end site-dropdown">
+                        <li class="dropdown-header">Signed in as <strong>{{ user.username }}</strong></li>
+                        <li><a class="dropdown-item" href="{% url 'profile' %}">Your Account</a></li>
+                        <li><a class="dropdown-item" href="{% url 'my_orders' %}">Your Orders</a></li>
+                        <li><a class="dropdown-item" href="{% url 'wishlist' %}">Your Wishlist</a></li>
+                        <li><a class="dropdown-item" href="{% url 'address_list' %}">Saved Addresses</a></li>
+                        <li><a class="dropdown-item" href="{% url 'affiliate_landing' %}">Affiliate program</a></li>
+                        {% if user.is_staff %}
+                        <li><a class="dropdown-item" href="{% url 'admin_dashboard' %}">Admin Dashboard</a></li>
+                        {% endif %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-danger">Sign out</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+
+            {% else %}
+
+                <a class="hd-icon d-none d-lg-inline-flex" href="{% url 'login' %}" aria-label="Sign in" title="Sign in">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+                </a>
+
+            {% endif %}
+
+            <a class="hd-icon hd-cart {% if active == 'cart' %}is-active{% endif %}" href="{% url 'cart' %}" aria-label="Cart">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
+                <span class="hd-badge{% if not nav_cart_count %} is-zero{% endif %}">{{ nav_cart_count|default:0 }}</span>
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- search panel (opens under the header) -->
+
+    <div class="hd-search" id="hdSearch" hidden>
+        <form class="hd-search-form" method="get" action="{% url 'products' %}" role="search">
+
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+
+            <input type="search" name="q" id="hdSearchInput" value="{{ query|default:'' }}" placeholder="Search for products, categories..." aria-label="Search products" autocomplete="off">
+
+            <select name="category" aria-label="Search category">
+                <option value="">All categories</option>
+                {% for c in nav_categories %}
+                    <option value="{{ c.slug }}" {% if selected_category == c.slug %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" class="hd-search-go">Search</button>
+
+            <button type="button" class="hd-search-close" id="hdSearchClose" aria-label="Close search">&times;</button>
+
+            <div class="hdr-suggest" id="hdrSuggest" hidden></div>
+
+        </form>
+    </div>
+
+</header>
+
+
+<!-- mobile menu -->
+
+<div class="hd-backdrop" id="hdBackdrop"></div>
+
+<aside class="hd-drawer" id="hdDrawer" aria-label="Menu" aria-hidden="true">
+
+    <div class="hd-drawer-head">
+        <span class="hd-brand-text">{{ site_name }}<em>.</em></span>
+        <button type="button" class="hd-icon" id="hdDrawerClose" aria-label="Close menu">&times;</button>
+    </div>
+
+    <nav class="hd-drawer-links">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'products' %}">Shop all</a>
+        <a href="{% url 'products' %}?deals=1">Deals</a>
+
+        <div class="hd-drawer-title">Categories</div>
+        {% for c in nav_categories %}
+            <a href="{% url 'products' %}?category={{ c.slug }}">{{ c.name }}</a>
+        {% endfor %}
+
+        <div class="hd-drawer-title">Account</div>
+        {% if user.is_authenticated %}
+            <a href="{% url 'profile' %}">Your account</a>
+            <a href="{% url 'my_orders' %}">Your orders</a>
+            <a href="{% url 'wishlist' %}">Wishlist</a>
+            <a href="{% url 'affiliate_landing' %}">Affiliate program</a>
+            {% if user.is_staff %}<a href="{% url 'admin_dashboard' %}">Admin dashboard</a>{% endif %}
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="hd-drawer-out">Sign out</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}">Sign in</a>
+            <a href="{% url 'register' %}">Create account</a>
+            <a href="{% url 'wishlist' %}">Wishlist</a>
+        {% endif %}
+
+        <div class="hd-drawer-title">Company</div>
+        <a href="{% url 'about' %}">About us</a>
+        <a href="{% url 'contact' %}">Contact</a>
+    </nav>
+
+</aside>
+
+
+<!-- flash messages as toasts (shown on every page) -->
+
+{% if messages %}
+<div class="toast-stack" id="toastStack" role="status" aria-live="polite">
+    {% for message in messages %}
+        <div class="toast-msg toast-{{ message.level_tag }}">
+            <span>{{ message }}</span>
+            <button type="button" aria-label="Close" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<a href="#" class="to-top" id="toTop" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">&uarr;</a>
+
+<script>
+    (function () {
+
+        var $ = function (id) { return document.getElementById(id); };
+
+        var header = $('siteHeader');
+        var toTop = $('toTop');
+
+        // header gets a soft shadow once you scroll; back-to-top button appears
+        function onScroll() {
+            var y = window.scrollY || document.documentElement.scrollTop;
+            header.classList.toggle('scrolled', y > 8);
+            toTop.classList.toggle('show', y > 700);
+        }
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+
+        // categories mega menu
+        var megaWrap = $('megaWrap'), megaBtn = $('megaBtn');
+
+        function setMega(open) {
+            megaWrap.classList.toggle('open', open);
+            megaBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+
+        megaBtn.addEventListener('click', function (e) { e.stopPropagation(); setMega(!megaWrap.classList.contains('open')); });
+        megaWrap.addEventListener('mouseenter', function () { if (window.matchMedia('(hover: hover)').matches) setMega(true); });
+        megaWrap.addEventListener('mouseleave', function () { if (window.matchMedia('(hover: hover)').matches) setMega(false); });
+
+        // search panel
+        var panel = $('hdSearch'), sBtn = $('hdSearchBtn'), input = $('hdSearchInput');
+
+        function setSearch(open) {
+            panel.hidden = !open;
+            sBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (open) { setTimeout(function () { input.focus(); }, 30); }
+        }
+
+        sBtn.addEventListener('click', function (e) { e.stopPropagation(); setSearch(panel.hidden); });
+        $('hdSearchClose').addEventListener('click', function () { setSearch(false); });
+
+        // mobile drawer
+        var drawer = $('hdDrawer'), back = $('hdBackdrop');
+
+        function setDrawer(open) {
+            drawer.classList.toggle('open', open);
+            back.classList.toggle('show', open);
+            drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+            $('hdBurger').setAttribute('aria-expanded', open ? 'true' : 'false');
+            document.body.style.overflow = open ? 'hidden' : '';
+        }
+
+        $('hdBurger').addEventListener('click', function () { setDrawer(true); });
+        $('hdDrawerClose').addEventListener('click', function () { setDrawer(false); });
+        back.addEventListener('click', function () { setDrawer(false); });
+
+        document.addEventListener('click', function (e) {
+            if (!megaWrap.contains(e.target)) setMega(false);
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') { setMega(false); setSearch(false); setDrawer(false); }
+        });
+
+        // toasts auto-hide
+        document.querySelectorAll('#toastStack .toast-msg').forEach(function (el, i) {
+            setTimeout(function () { el.classList.add('hide'); }, 4500 + i * 400);
+            setTimeout(function () { el.remove(); }, 5100 + i * 400);
+        });
+
+        // live search suggestions
+        var box = $('hdrSuggest');
+        var timer = null;
+
+        function hide() { box.hidden = true; box.innerHTML = ''; }
+
+        function esc(text) {
+            var d = document.createElement('div');
+            d.textContent = text;
+            return d.innerHTML;
+        }
+
+        input.addEventListener('input', function () {
+            clearTimeout(timer);
+            var q = input.value.trim();
+            if (q.length < 2) { hide(); return; }
+
+            timer = setTimeout(function () {
+                fetch("{% url 'search_suggest' %}?q=" + encodeURIComponent(q))
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (!data.results.length) { hide(); return; }
+                        box.innerHTML = data.results.map(function (p) {
+                            return '<a href="' + p.url + '">' +
+                                (p.image ? '<img src="' + p.image + '" alt="">' : '<span class="sg-ph">&#128230;</span>') +
+                                '<span class="sg-text"><strong>' + esc(p.name) + '</strong>' +
+                                '<small>' + esc(p.category) + '</small></span>' +
+                                '<span class="sg-price">&#8377;' + esc(p.price) + '</span></a>';
+                        }).join('');
+                        box.hidden = false;
+                    })
+                    .catch(hide);
+            }, 200);
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!box.contains(e.target) && e.target !== input) hide();
+        });
+
+    })();
+</script>

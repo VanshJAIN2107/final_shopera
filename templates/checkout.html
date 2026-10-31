@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Checkout - {{ site_name }}</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Razorpay -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <style>
+
+        .checkout-container { padding-top: 32px; padding-bottom: 40px; }
+
+        .page-title { font-size: 1.9rem; font-weight: 700; margin-bottom: 20px; }
+
+        .co-section { padding: 22px 26px; margin-bottom: 16px; }
+        .co-section h2 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin: 0 0 18px;
+        }
+        .co-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .form-label { margin-bottom: 6px; }
+        textarea.form-control { resize: vertical; }
+
+        .pay-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: border-color .15s, background .15s;
+        }
+        .pay-option:last-child { margin-bottom: 0; }
+        .pay-option:hover { background: var(--bg); }
+        .pay-option:has(input:checked) {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+        .pay-option .form-check-input { margin: 0; flex-shrink: 0; }
+        .pay-option label { cursor: pointer; font-weight: 600; margin: 0; flex: 1; }
+
+        .review-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .review-row:last-child { border-bottom: 0; padding-bottom: 0; }
+        .review-img, .review-noimg {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            border-radius: 10px;
+            background: var(--bg);
+            flex-shrink: 0;
+        }
+        .review-info { flex: 1; min-width: 0; }
+        .review-name { font-weight: 600; color: var(--text); }
+
+        .co-summary { position: sticky; top: calc(var(--header-h) + 24px); padding: 22px; }
+        .co-summary h2 { font-family: 'Inter', sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 16px; }
+        .co-line { display: flex; justify-content: space-between; margin-bottom: 10px; color: var(--muted); }
+        .co-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 14px;
+            margin: 14px 0 18px;
+            border-top: 1px solid var(--border);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--danger);
+        }
+        .co-total .az-price { color: var(--danger); font-size: .9rem; }
+        .co-summary .btn-cart { padding: 12px 18px; font-size: 15px; }
+        .co-summary .btn-cart:disabled { opacity: .6; cursor: not-allowed; }
+        .secure-box { margin-top: 14px; text-align: center; color: var(--muted); font-size: 12.5px; }
+
+        @media (max-width: 991px) {
+            .co-summary { position: static; }
+        }
+        @media (max-width: 575px) {
+            .co-section { padding: 18px 16px; }
+        }
+
+    </style>
+{% include 'partials/theme.html' %}
+</head>
+
+
+<body
+    data-razorpay-order-id="{{ razorpay_order_id|default:'' }}"
+    data-razorpay-amount="{{ razorpay_amount|default:'' }}"
+    data-razorpay-key="{{ razorpay_key|default:'' }}"
+    data-pending-order-id="{{ pending_order_id|default:'' }}"
+>
+
+
+<!-- NAVBAR -->
+
+{% include 'partials/navbar.html' with active='cart' %}
+
+
+<!-- MAIN -->
+
+<div class="container checkout-container">
+
+    <h1 class="page-title">Checkout</h1>
+
+    <form
+        method="POST"
+        id="checkoutForm"
+    >
+
+        {% csrf_token %}
+
+        <div class="row g-4">
+
+
+            <!-- LEFT: STEPS -->
+
+            <div class="col-lg-8">
+
+                <!-- 1. DELIVERY ADDRESS -->
+
+                <div class="surface co-section">
+
+                    <h2><span class="co-num">1</span> Delivery address</h2>
+
+                    {% if saved_addresses %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label mb-0" for="savedAddress">Choose a saved address</label>
+                            <a href="{% url 'address_list' %}" class="small">Manage addresses</a>
+                        </div>
+                        <select id="savedAddress" class="form-select">
+                            <option value="">Enter a new address</option>
+                            {% for a in saved_addresses %}
+                            <option value="{{ a.id }}"
+                                data-name="{{ a.full_name }}"
+                                data-phone="{{ a.phone }}"
+                                data-address="{{ a.line }}"
+                                data-pincode="{{ a.pincode }}"
+                                data-city="{{ a.city }}"
+                                data-state="{{ a.state }}"
+                                {% if default_address and default_address.id == a.id %}data-default="1"{% endif %}>{{ a.full_name }} - {{ a.city }} {{ a.pincode }}{% if a.is_default %} (Default){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% else %}
+                    <p class="az-meta mb-3">Tip: <a href="{% url 'address_add' %}">save an address</a> to check out faster next time.</p>
+                    {% endif %}
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="f_name">Full Name</label>
+                            <input
+                                type="text"
+                                name="full_name"
+                                id="f_name"
+                                class="form-control"
+                                placeholder="Enter your full name"
+                                value="{{ form.full_name }}"
+                                autocomplete="name"
+                                required
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="f_phone">Phone Number</label>
+                            <input
+                                type="tel"
+                                name="phone"
+                                id="f_phone"
+                                class="form-control"
+                                maxlength="15"
+                                inputmode="tel"
+                                placeholder="10 digit mobile number"
+                                value="{{ form.phone }}"
+                                autocomplete="tel"
+                                required
+                            >
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label" for="f_address">Address</label>
+                            <textarea
+                                name="address"
+                                id="f_address"
+                                class="form-control"
+                                rows="3"
+                                placeholder="House / flat no, building, street, area, landmark"
+                                autocomplete="street-address"
+                                required
+                            >{{ form.address }}</textarea>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label" for="f_pin">PIN Code</label>
+                            <input
+                                type="text"
+                                name="pincode"
+                                id="f_pin"
+                                class="form-control"
+                                maxlength="6"
+                                inputmode="numeric"
+                                pattern="[1-9][0-9]{5}"
+                                placeholder="6 digit PIN"
+                                title="Enter a 6 digit PIN code"
+                                value="{{ form.pincode }}"
+                                autocomplete="postal-code"
+                                required
+                            >
+                            <span class="az-meta d-block mt-1" id="pinHint">City and state fill in automatically.</span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label" for="f_city">City / District</label>
+                            <input
+                                type="text"
+                                name="city"
+                                id="f_city"
+                                class="form-control"
+                                placeholder="City"
+                                value="{{ form.city }}"
+                                autocomplete="address-level2"
+                                required
+                            >
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label" for="f_state">State</label>
+                            <select name="state" id="f_state" class="form-select" autocomplete="address-level1" required>
+                                <option value="">Select state</option>
+                                {% for st in states %}
+                                    <option value="{{ st }}"{% if form.state == st %} selected{% endif %}>{{ st }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" name="save_address" id="saveAddress" value="1" checked>
+                        <label class="form-check-label" for="saveAddress">Save this address for next time</label>
+                    </div>
+                </div>
+
+
+                <!-- 2. PAYMENT METHOD -->
+
+                <div class="surface co-section">
+
+                    <h2><span class="co-num">2</span> Payment method</h2>
+
+                    <div class="pay-option">
+                        <input
+                            class="form-check-input"
+                            type="radio"
+                            name="payment_method"
+                            id="cod"
+                            value="COD"
+                            checked
+                        >
+                        <label for="cod">💵 Cash on Delivery</label>
+                    </div>
+
+                    <div class="pay-option">
+                        <input
+                            class="form-check-input"
+                            type="radio"
+                            name="payment_method"
+                            id="razorpay"
+                            value="RAZORPAY"
+                        >
+                        <label for="razorpay">💳 UPI / Razorpay</label>
+                    </div>
+
+                </div>
+
+
+                <!-- 3. REVIEW ITEMS -->
+
+                <div class="surface co-section">
+
+                    <h2><span class="co-num">3</span> Review items</h2>
+
+                    {% for item in cart_items %}
+
+                        <div class="review-row">
+
+                            {% if item.product.image %}
+                                <img
+                                    src="{{ item.product.image.url }}"
+                                    class="review-img"
+                                    alt="{{ item.product.name }}"
+                                >
+                            {% else %}
+                                <div class="review-noimg"></div>
+                            {% endif %}
+
+                            <div class="review-info">
+                                <div class="review-name">
+                                    {{ item.product.name }}
+                                </div>
+                                <div class="az-meta">
+                                    Qty: {{ item.quantity }} &middot; Eligible for free delivery
+                                </div>
+                            </div>
+
+                            <div>
+                                <span class="az-price"><span class="sym">₹</span><span class="amt">{{ item.item_total }}</span></span>
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+            <!-- RIGHT: ORDER SUMMARY -->
+
+            <div class="col-lg-4">
+
+                <div class="surface co-summary">
+
+                    <h2>Order Summary</h2>
+
+                    <div class="co-line">
+                        <span>Items:</span>
+                        <span>₹{{ subtotal }}</span>
+                    </div>
+
+                    {% if discount > 0 %}
+                    <div class="co-line text-success">
+                        <span>Coupon ({{ coupon.code }}):</span>
+                        <span>&minus;₹{{ discount }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="co-line">
+                        <span>Delivery:</span>
+                        <span class="text-success">FREE</span>
+                    </div>
+
+                    <div class="co-total">
+                        <span>Order Total:</span>
+                        <span class="az-price"><span class="sym">₹</span><span class="amt">{{ total }}</span></span>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn-cart"
+                        id="placeOrderBtn"
+                    >
+                        🛒 Place Order
+                    </button>
+
+                    <div class="secure-box">
+                        🔐 Secure payment. Your information is kept safe.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </form>
+
+</div>
+
+<!-- FOOTER -->
+
+{% include 'partials/footer.html' %}
+
+
+<!-- RAZORPAY JAVASCRIPT -->
+
+<script>
+    (function () {
+
+        var f = document.querySelector('[name="full_name"]');
+        var p = document.querySelector('[name="phone"]');
+        var a = document.querySelector('[name="address"]');
+        var pin = document.getElementById('f_pin');
+        var city = document.getElementById('f_city');
+        var state = document.getElementById('f_state');
+        var hint = document.getElementById('pinHint');
+        var sel = document.getElementById('savedAddress');
+
+        var HINT = 'City and state fill in automatically.';
+
+        function setState(name) {
+            if (!name) return;
+            var wanted = name.toLowerCase().replace(/&/g, 'and');
+            for (var i = 0; i < state.options.length; i++) {
+                var o = state.options[i].value.toLowerCase();
+                if (o && o === wanted) { state.selectedIndex = i; return; }
+            }
+        }
+
+        // PIN code -> city + state (free India Post lookup; optional, works only while online)
+        var lastPin = '';
+
+        function lookup() {
+            var value = pin.value.trim();
+            if (!/^[1-9][0-9]{5}$/.test(value) || value === lastPin) return;
+            lastPin = value;
+            hint.textContent = 'Checking PIN code...';
+
+            fetch('https://api.postalpincode.in/pincode/' + value)
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var info = data && data[0];
+                    if (info && info.Status === 'Success' && info.PostOffice && info.PostOffice.length) {
+                        var office = info.PostOffice[0];
+                        if (!city.value || city.dataset.auto === '1') {
+                            city.value = office.District || office.Block || office.Name || '';
+                            city.dataset.auto = '1';
+                        }
+                        setState(office.State);
+                        hint.textContent = 'Delivering to ' + (office.District || '') + ', ' + (office.State || '') + '.';
+                    } else {
+                        hint.textContent = 'PIN code not found. Please check it or fill city and state yourself.';
+                    }
+                })
+                .catch(function () { hint.textContent = HINT; });
+        }
+
+        pin.addEventListener('input', function () {
+            pin.value = pin.value.replace(/\D/g, '').slice(0, 6);
+            if (pin.value.length < 6) { hint.textContent = HINT; lastPin = ''; }
+            lookup();
+        });
+
+        city.addEventListener('input', function () { city.dataset.auto = '0'; });
+
+        // saved address picker fills every field
+        function fill(opt) {
+            f.value = opt.dataset.name || '';
+            p.value = opt.dataset.phone || '';
+            a.value = opt.dataset.address || '';
+            pin.value = opt.dataset.pincode || '';
+            city.value = opt.dataset.city || '';
+            city.dataset.auto = '0';
+            setState(opt.dataset.state || '');
+            lastPin = pin.value;
+            hint.textContent = HINT;
+        }
+
+        if (sel) {
+            sel.addEventListener('change', function () {
+                var o = sel.options[sel.selectedIndex];
+                if (o.value) {
+                    fill(o);
+                } else {
+                    f.value = ''; p.value = ''; a.value = '';
+                    pin.value = ''; city.value = ''; state.selectedIndex = 0; lastPin = '';
+                    hint.textContent = HINT;
+                }
+            });
+
+            var untouched = !f.value && !p.value && !a.value && !pin.value;
+            if (untouched) {
+                var d = sel.querySelector('option[data-default="1"]');
+                if (d) { sel.value = d.value; fill(d); }
+            }
+        }
+
+        if (pin.value) { lastPin = pin.value; }
+
+    })();
+</script>
+
+<script>
+
+    const checkoutForm =
+        document.getElementById('checkoutForm');
+
+    const placeOrderBtn =
+        document.getElementById('placeOrderBtn');
+
+
+    checkoutForm.addEventListener(
+        'submit',
+        function(event) {
+
+            event.preventDefault();
+
+
+            const paymentMethod =
+                document.querySelector(
+                    'input[name="payment_method"]:checked'
+                ).value;
+
+
+            // =========================================
+            // CASH ON DELIVERY
+            // =========================================
+
+            if (paymentMethod === 'COD') {
+
+                placeOrderBtn.disabled = true;
+
+                placeOrderBtn.innerHTML =
+                    '⏳ Placing Order...';
+
+
+                checkoutForm.submit();
+
+                return;
+            }
+
+
+            // =========================================
+            // RAZORPAY
+            // =========================================
+
+            if (paymentMethod === 'RAZORPAY') {
+
+                placeOrderBtn.disabled = true;
+
+                placeOrderBtn.innerHTML =
+                    '⏳ Opening Payment...';
+
+
+                const formData =
+                    new FormData(checkoutForm);
+
+
+                fetch(
+                    "{% url 'checkout' %}",
+                    {
+                        method: "POST",
+                        body: formData,
+
+                        headers: {
+                            "X-Requested-With":
+                                "XMLHttpRequest"
+                        }
+                    }
+                )
+
+                .then(function(response) {
+
+                    return response.text();
+
+                })
+
+                .then(function(html) {
+
+                    const parser =
+                        new DOMParser();
+
+                    const doc =
+                        parser.parseFromString(
+                            html,
+                            'text/html'
+                        );
+
+
+                    const razorpayOrderId =
+                        doc.body.dataset
+                            .razorpayOrderId;
+
+
+                    const razorpayAmount =
+                        doc.body.dataset
+                            .razorpayAmount;
+
+
+                    const razorpayKey =
+                        doc.body.dataset
+                            .razorpayKey;
+
+
+                    const pendingOrderId =
+                        doc.body.dataset
+                            .pendingOrderId;
+
+
+                    if (
+                        !razorpayOrderId ||
+                        !razorpayAmount ||
+                        !razorpayKey ||
+                        !pendingOrderId
+                    ) {
+
+                        alert(
+                            'Unable to start payment. Please try again.'
+                        );
+
+                        placeOrderBtn.disabled =
+                            false;
+
+                        placeOrderBtn.innerHTML =
+                            '🛒 Place Order';
+
+                        return;
+                    }
+
+
+                    // =================================
+                    // RAZORPAY OPTIONS
+                    // =================================
+
+                    const options = {
+
+                        key: razorpayKey,
+
+                        amount: razorpayAmount,
+
+                        currency: "INR",
+
+                        name: "{{ site_name|escapejs }}",
+
+                        description:
+                            "{{ site_name|escapejs }} Order Payment",
+
+                        order_id:
+                            razorpayOrderId,
+
+
+                        handler:
+                            function(response) {
+
+                                // =========================
+                                // VERIFY PAYMENT
+                                // =========================
+
+                                const verifyData =
+                                    new FormData();
+
+
+                                verifyData.append(
+                                    'razorpay_order_id',
+                                    response.razorpay_order_id
+                                );
+
+
+                                verifyData.append(
+                                    'razorpay_payment_id',
+                                    response.razorpay_payment_id
+                                );
+
+
+                                verifyData.append(
+                                    'razorpay_signature',
+                                    response.razorpay_signature
+                                );
+
+
+                                verifyData.append(
+                                    'order_id',
+                                    pendingOrderId
+                                );
+
+
+                                fetch(
+                                    "{% url 'razorpay_verify' %}",
+                                    {
+                                        method: "POST",
+                                        body: verifyData
+                                    }
+                                )
+
+                                .then(
+                                    function(response) {
+
+                                        return response.json();
+
+                                    }
+                                )
+
+                                .then(
+                                    function(data) {
+
+                                        if (data.success) {
+
+                                            window.location.href =
+                                                "{% url 'order_success' 0 %}"
+                                                .replace(
+                                                    '/0/',
+                                                    '/' +
+                                                    data.order_id +
+                                                    '/'
+                                                );
+
+                                        }
+
+                                        else {
+
+                                            alert(
+                                                data.message ||
+                                                'Payment verification failed.'
+                                            );
+
+
+                                            placeOrderBtn.disabled =
+                                                false;
+
+
+                                            placeOrderBtn.innerHTML =
+                                                '🛒 Place Order';
+
+                                        }
+
+                                    }
+                                )
+
+                                .catch(
+                                    function(error) {
+
+                                        console.error(
+                                            error
+                                        );
+
+
+                                        alert(
+                                            'Something went wrong while verifying payment.'
+                                        );
+
+
+                                        placeOrderBtn.disabled =
+                                            false;
+
+
+                                        placeOrderBtn.innerHTML =
+                                            '🛒 Place Order';
+
+                                    }
+                                );
+
+                            },
+
+
+                        modal: {
+
+                            ondismiss:
+                                function() {
+
+                                    placeOrderBtn.disabled =
+                                        false;
+
+                                    placeOrderBtn.innerHTML =
+                                        '🛒 Place Order';
+
+                                }
+
+                        },
+
+
+                        prefill: {
+
+                            name:
+                                document.querySelector(
+                                    '[name="full_name"]'
+                                ).value,
+
+                            contact:
+                                document.querySelector(
+                                    '[name="phone"]'
+                                ).value
+
+                        },
+
+
+                        theme: {
+
+                            color: "#3b2f2a"
+
+                        }
+
+                    };
+
+
+                    const razorpay =
+                        new Razorpay(options);
+
+
+                    razorpay.on(
+                        'payment.failed',
+                        function(response) {
+
+                            console.error(
+                                response.error
+                            );
+
+
+                            alert(
+                                'Payment failed. Please try again.'
+                            );
+
+
+                            placeOrderBtn.disabled =
+                                false;
+
+
+                            placeOrderBtn.innerHTML =
+                                '🛒 Place Order';
+
+                        }
+                    );
+
+
+                    razorpay.open();
+
+                })
+
+                .catch(
+                    function(error) {
+
+                        console.error(
+                            error
+                        );
+
+
+                        alert(
+                            'Unable to start payment.'
+                        );
+
+
+                        placeOrderBtn.disabled =
+                            false;
+
+
+                        placeOrderBtn.innerHTML =
+                            '🛒 Place Order';
+
+                    }
+                );
+
+            }
+
+        }
+    );
+
+</script>
+
+
+</body>
+
+</html>

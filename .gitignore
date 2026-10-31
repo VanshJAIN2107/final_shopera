@@ -1,0 +1,12 @@
+.env
+db.sqlite3
+db.sqlite3.backup*
+__pycache__/
+*.pyc
+staticfiles/
+media/
+logs/
+templates_backup/
+.venv/
+venv/
+.vscode/

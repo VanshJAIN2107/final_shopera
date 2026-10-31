@@ -1,0 +1,555 @@
+{% extends 'base.html' %}
+
+{% block title %}Affiliate Program | {{ site_name }}{% endblock %}
+
+{% block meta_description %}Earn {{ rate|floatformat:"-2" }}% commission on every order you refer to {{ site_name }}. Share your link, track clicks and sales live, and get paid by UPI or bank transfer.{% endblock %}
+
+{% block extra_css %}
+<style>
+
+    /* AFFILIATE LANDING - layout only (colours come from partials/theme.html) */
+
+    .af-wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+    .af-section { margin-top: 84px; }
+
+    .af-eyebrow {
+        display: inline-block;
+        margin-bottom: 10px;
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+    }
+
+    .af-title { font-size: clamp(26px, 4vw, 38px); font-weight: 800; line-height: 1.15; margin: 0 0 12px; }
+    .af-lead { color: var(--muted); font-size: 17px; line-height: 1.75; max-width: 620px; }
+
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+
+    /* hero */
+
+    .af-hero {
+        position: relative;
+        overflow: hidden;
+        margin-top: 28px;
+        padding: 70px 56px;
+        border-radius: 30px;
+        border: 1px solid var(--border);
+        background:
+            radial-gradient(circle at 90% 10%, #f3e3c8 0%, transparent 45%),
+            linear-gradient(120deg, #fbf6ee 0%, #f3ece1 100%);
+        box-shadow: var(--shadow-md);
+    }
+
+    .af-hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 40px; align-items: center; }
+
+    .af-hero h1 { font-size: clamp(34px, 5vw, 58px); font-weight: 800; line-height: 1.08; margin: 10px 0 18px; }
+    .af-hero h1 em { color: var(--accent); font-style: italic; }
+
+    .af-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+
+    .af-note {
+        display: inline-block;
+        margin-top: 16px;
+        padding: 8px 14px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        background: var(--warning-soft);
+        color: var(--warning);
+        border: 1px solid #f0dcaf;
+    }
+
+    .af-note.is-danger { background: var(--danger-soft); color: var(--danger); border-color: #f1cbc3; }
+
+    .af-badge-card {
+        padding: 34px 26px;
+        text-align: center;
+        border-radius: 24px;
+        background: var(--primary);
+        color: #fff;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .af-badge-card b {
+        display: block;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: clamp(54px, 8vw, 84px);
+        line-height: 1;
+        color: #e8c58f;
+    }
+
+    .af-badge-card span { display: block; margin-top: 8px; color: #e3d6c3; font-size: 15px; }
+    .af-badge-card small { display: block; margin-top: 14px; color: #bfae98; font-size: 13px; }
+
+    /* steps + cards */
+
+    .af-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 28px; counter-reset: step; }
+    .af-step { padding: 24px 22px 22px; background: var(--bg-alt); border-radius: 18px; }
+
+    .af-step::before {
+        counter-increment: step;
+        content: counter(step);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        margin-bottom: 14px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: #fff;
+        font-weight: 800;
+    }
+
+    .af-step h3 { font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 700; margin: 0 0 6px; }
+    .af-step p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+    .af-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 26px; }
+
+    .af-card {
+        height: 100%;
+        padding: 26px 22px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        transition: transform .25s, box-shadow .25s, border-color .25s;
+    }
+
+    .af-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); border-color: var(--accent); }
+
+    .af-ico {
+        width: 52px;
+        height: 52px;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        background: var(--accent-soft);
+        font-size: 25px;
+    }
+
+    .af-card h3 { font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 700; margin: 0 0 8px; }
+    .af-card p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.65; }
+
+    /* calculator */
+
+    .af-calc { display: grid; grid-template-columns: 1.1fr .9fr; gap: 0; overflow: hidden; margin-top: 26px; }
+    .af-calc-form { padding: 32px 30px; }
+    .af-calc-out { padding: 32px 30px; display: flex; flex-direction: column; justify-content: center; text-align: center; background: var(--accent-soft); }
+
+    .af-field { margin-bottom: 22px; }
+    .af-field-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .af-field-head label { font-weight: 600; font-size: 14px; }
+    .af-field-head input { width: 110px; text-align: right; padding: 7px 10px; }
+
+    .af-range { width: 100%; accent-color: var(--primary); }
+
+    .af-result { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(36px, 6vw, 52px); font-weight: 800; color: var(--primary); line-height: 1.1; }
+    .af-calc-out p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+    .af-calc-out .af-fine { margin-top: 16px; font-size: 12.5px; font-style: italic; }
+
+    /* rules + FAQ */
+
+    .af-list { max-width: 860px; margin: 26px auto 0; }
+
+    .af-list details {
+        margin-bottom: 10px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--surface);
+        overflow: hidden;
+    }
+
+    .af-list summary {
+        position: relative;
+        padding: 17px 52px 17px 22px;
+        font-weight: 600;
+        cursor: pointer;
+        list-style: none;
+    }
+
+    .af-list summary::-webkit-details-marker { display: none; }
+
+    .af-list summary::after {
+        content: "+";
+        position: absolute;
+        right: 22px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 22px;
+        color: var(--accent);
+    }
+
+    .af-list details[open] summary { background: var(--accent-soft); color: var(--primary); }
+    .af-list details[open] summary::after { content: "\2212"; }
+    .af-list .af-ans { padding: 16px 22px 18px; color: #4d443d; line-height: 1.75; }
+
+    /* CTA */
+
+    .af-cta {
+        padding: 56px 30px;
+        text-align: center;
+        border-radius: 28px;
+        color: #fff;
+        background: linear-gradient(120deg, #3b2f2a 0%, #6b4e3a 100%);
+    }
+
+    .af-cta h2 { color: #fff; font-size: clamp(26px, 4vw, 38px); font-weight: 800; margin: 0 0 10px; }
+    .af-cta p { color: #eadfce; max-width: 560px; margin: 0 auto 24px; }
+    .af-cta a { display: inline-block; padding: 13px 30px; margin: 4px; border-radius: 999px; font-weight: 700; text-decoration: none; }
+    .af-cta .af-solid { background: #e8c58f; color: #2b211c; }
+    .af-cta .af-solid:hover { background: #f1d4a6; color: #2b211c; }
+    .af-cta .af-ghost { border: 1px solid rgba(255, 255, 255, .5); color: #fff; font-weight: 600; }
+    .af-cta .af-ghost:hover { background: rgba(255, 255, 255, .14); color: #fff; }
+
+    @media (max-width: 991px) {
+        .af-hero { padding: 44px 26px; }
+        .af-hero-grid, .af-calc { grid-template-columns: 1fr; }
+        .af-steps, .af-cards { grid-template-columns: repeat(2, 1fr); }
+        .af-section { margin-top: 60px; }
+    }
+
+    @media (max-width: 520px) {
+        .af-wrap { padding: 0 12px; }
+        .af-steps, .af-cards { grid-template-columns: 1fr; }
+        .af-calc-form, .af-calc-out { padding: 24px 18px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .reveal { opacity: 1; transform: none; transition: none; }
+    }
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="af-wrap">
+
+    <!-- HERO -->
+
+    <section class="af-hero">
+        <div class="af-hero-grid">
+
+            <div>
+                <span class="af-eyebrow">{{ site_name }} affiliate program</span>
+                <h1>Earn money by <em>sharing products</em> you like</h1>
+                <p class="af-lead">
+                    Get your own link, share it anywhere, and earn
+                    <strong>{{ rate|floatformat:"-2" }}% commission</strong> on every order it brings in.
+                    Free to join, no minimum followers, no stock to hold.
+                </p>
+
+                <div class="af-actions">
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'register' %}" class="btn-theme">Join now</a>
+                        <a href="{% url 'login' %}?next={% url 'affiliate_join' %}" class="btn-theme-outline">Sign in</a>
+                    {% elif not affiliate %}
+                        <a href="{% url 'affiliate_join' %}" class="btn-theme">Become an affiliate</a>
+                    {% else %}
+                        <a href="{% url 'affiliate_dashboard' %}" class="btn-theme">Open dashboard</a>
+                    {% endif %}
+                </div>
+
+                {% if affiliate.status == 'Pending' %}
+                    <div class="af-note">Your application is under review. We will email you once it is approved.</div>
+                {% elif affiliate.status == 'Suspended' %}
+                    <div class="af-note is-danger">Your affiliate account is currently suspended. Please contact us if you think this is a mistake.</div>
+                {% endif %}
+            </div>
+
+            <div class="af-badge-card">
+                <b>{{ rate|floatformat:"-2" }}%</b>
+                <span>commission on every order</span>
+                <small>{{ cookie_days }}-day tracking &middot; payouts from &#8377;{{ min_payout }}</small>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- HOW IT WORKS -->
+
+    <section class="af-section reveal">
+
+        <span class="af-eyebrow">How it works</span>
+        <h2 class="af-title">Start earning in four steps</h2>
+
+        <div class="af-steps">
+            <div class="af-step">
+                <h3>Join</h3>
+                <p>Create a free account and apply to the program. It takes under a minute.</p>
+            </div>
+            <div class="af-step">
+                <h3>Share your link</h3>
+                <p>Get your personal link and share it, or build a link to any product page.</p>
+            </div>
+            <div class="af-step">
+                <h3>Customers buy</h3>
+                <p>When someone orders through your link, the commission is recorded for you.</p>
+            </div>
+            <div class="af-step">
+                <h3>Get paid</h3>
+                <p>Request a payout once you reach &#8377;{{ min_payout }} and we send it to your UPI or bank.</p>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- WHY JOIN -->
+
+    <section class="af-section reveal">
+
+        <span class="af-eyebrow">Why join</span>
+        <h2 class="af-title">Simple terms, clearly stated</h2>
+
+        <div class="af-cards">
+            <div class="af-card">
+                <div class="af-ico">&#128176;</div>
+                <h3>{{ rate|floatformat:"-2" }}% on every order</h3>
+                <p>Earn {{ rate|floatformat:"-2" }}% of the order total on every order placed through your link.</p>
+            </div>
+            <div class="af-card">
+                <div class="af-ico">&#9201;&#65039;</div>
+                <h3>{{ cookie_days }}-day window</h3>
+                <p>If a visitor buys within {{ cookie_days }} days of clicking your link, the sale is yours.</p>
+            </div>
+            <div class="af-card">
+                <div class="af-ico">&#127974;</div>
+                <h3>UPI or bank payouts</h3>
+                <p>Withdraw to UPI or a bank account, starting from &#8377;{{ min_payout }}.</p>
+            </div>
+            <div class="af-card">
+                <div class="af-ico">&#128202;</div>
+                <h3>Live dashboard</h3>
+                <p>See clicks, orders, pending and available earnings as they happen.</p>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- CALCULATOR -->
+
+    <section class="af-section reveal">
+
+        <span class="af-eyebrow">Earnings calculator</span>
+        <h2 class="af-title">What could you earn?</h2>
+
+        <div class="surface af-calc" id="af-calc" data-rate="{{ rate|floatformat:'-2u' }}">
+
+            <div class="af-calc-form">
+
+                <div class="af-field">
+                    <div class="af-field-head">
+                        <label for="af-orders">Orders per month</label>
+                        <input type="number" class="form-control" id="af-orders-n" min="1" max="200" value="20" aria-label="Orders per month">
+                    </div>
+                    <input type="range" class="af-range" id="af-orders" min="1" max="200" value="20">
+                </div>
+
+                <div class="af-field">
+                    <div class="af-field-head">
+                        <label for="af-aov">Average order value (&#8377;)</label>
+                        <input type="number" class="form-control" id="af-aov-n" min="100" max="20000" step="50" value="800" aria-label="Average order value">
+                    </div>
+                    <input type="range" class="af-range" id="af-aov" min="100" max="20000" step="50" value="800">
+                </div>
+
+            </div>
+
+            <div class="af-calc-out">
+                <span class="af-eyebrow">Estimated monthly earnings</span>
+                <div class="af-result" id="af-result">&#8377;0</div>
+                <p id="af-detail"></p>
+                <p class="af-fine">This is an estimate, not a guarantee. Actual earnings depend on real orders.</p>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- RULES -->
+
+    <section class="af-section reveal" id="rules">
+
+        <div class="text-center">
+            <span class="af-eyebrow">Program rules</span>
+            <h2 class="af-title">The fine print, in plain words</h2>
+        </div>
+
+        <div class="af-list">
+
+            <details open>
+                <summary>How is my commission calculated?</summary>
+                <div class="af-ans">Commission is earned on the order total after discounts, at the program rate of {{ rate|floatformat:"-2" }}%.</div>
+            </details>
+
+            <details>
+                <summary>When does a commission become approved?</summary>
+                <div class="af-ans">A commission starts as pending and becomes approved when the order is delivered. Only approved commissions can be withdrawn.</div>
+            </details>
+
+            <details>
+                <summary>When is a commission cancelled?</summary>
+                <div class="af-ans">If the order is cancelled or refunded, the commission on it is cancelled too.</div>
+            </details>
+
+            <details>
+                <summary>Can I earn on my own purchases?</summary>
+                <div class="af-ans">No. Orders placed from your own account do not earn commission.</div>
+            </details>
+
+            <details>
+                <summary>Who gets the credit if a customer clicks several links?</summary>
+                <div class="af-ans">The last affiliate link clicked within {{ cookie_days }} days before the order gets the credit.</div>
+            </details>
+
+            <details>
+                <summary>How do payouts work?</summary>
+                <div class="af-ans">Payouts are manual. Once your approved balance reaches &#8377;{{ min_payout }}, request a payout from your dashboard and we send it to your saved UPI id or bank account.</div>
+            </details>
+
+            <details>
+                <summary>What gets an account suspended?</summary>
+                <div class="af-ans">Spam, fake clicks or orders, and misleading claims about {{ site_name }} or its products lead to suspension, and unpaid commissions may be cancelled.</div>
+            </details>
+
+        </div>
+
+    </section>
+
+
+    <!-- FAQ -->
+
+    <section class="af-section reveal">
+
+        <div class="text-center">
+            <span class="af-eyebrow">Questions</span>
+            <h2 class="af-title">Things people often ask</h2>
+        </div>
+
+        <div class="af-list">
+
+            <details>
+                <summary>Does it cost anything to join?</summary>
+                <div class="af-ans">No. The program is free to join.</div>
+            </details>
+
+            <details>
+                <summary>Do I need a website or a big following?</summary>
+                <div class="af-ans">No. You can share your link on social media, in chat groups, in videos or on a blog. You just need to follow the rules above.</div>
+            </details>
+
+            <details>
+                <summary>How long does approval take?</summary>
+                <div class="af-ans">We review applications manually and email you once your account is approved. Your links start earning from that point.</div>
+            </details>
+
+            <details>
+                <summary>Can I link to a specific product?</summary>
+                <div class="af-ans">Yes. The link generator in your dashboard adds your code to any store page or product URL.</div>
+            </details>
+
+            <details>
+                <summary>How do I see how I am doing?</summary>
+                <div class="af-ans">Your dashboard shows clicks, orders, conversion rate, pending and available earnings, and your payout history.</div>
+            </details>
+
+        </div>
+
+    </section>
+
+
+    <!-- CTA -->
+
+    <section class="af-section reveal">
+
+        <div class="af-cta">
+            <h2>Turn your recommendations into income</h2>
+            <p>Join the {{ site_name }} affiliate program and start sharing in minutes.</p>
+
+            {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="af-solid">Join now</a>
+                <a href="{% url 'login' %}?next={% url 'affiliate_join' %}" class="af-ghost">Sign in</a>
+            {% elif not affiliate %}
+                <a href="{% url 'affiliate_join' %}" class="af-solid">Become an affiliate</a>
+            {% else %}
+                <a href="{% url 'affiliate_dashboard' %}" class="af-solid">Open dashboard</a>
+            {% endif %}
+        </div>
+
+    </section>
+
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+(function () {
+
+    // fade-in on scroll
+    var items = document.querySelectorAll('.reveal');
+
+    if ('IntersectionObserver' in window) {
+        var seen = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add('in');
+                seen.unobserve(entry.target);
+            });
+        }, { threshold: 0.12 });
+        items.forEach(function (el) { seen.observe(el); });
+    } else {
+        items.forEach(function (el) { el.classList.add('in'); });
+    }
+
+    // earnings calculator
+    var box = document.getElementById('af-calc');
+    if (!box) return;
+
+    var rate = parseFloat(box.getAttribute('data-rate')) || 0;
+    var ordersR = document.getElementById('af-orders');
+    var ordersN = document.getElementById('af-orders-n');
+    var aovR = document.getElementById('af-aov');
+    var aovN = document.getElementById('af-aov-n');
+    var result = document.getElementById('af-result');
+    var detail = document.getElementById('af-detail');
+
+    function num(el, min, max, fallback) {
+        var v = parseFloat(el.value);
+        if (isNaN(v)) v = fallback;
+        return Math.min(max, Math.max(min, v));
+    }
+
+    function fmt(n) {
+        return Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+    }
+
+    function update() {
+        var orders = num(ordersN, 1, 200, 20);
+        var aov = num(aovN, 0, 1000000, 800);
+        var earn = orders * aov * rate / 100;
+        result.textContent = '₹' + fmt(earn);
+        detail.textContent = fmt(orders) + ' orders × ₹' + fmt(aov) + ' × ' + rate + '%';
+    }
+
+    function link(range, number) {
+        range.addEventListener('input', function () { number.value = range.value; update(); });
+        number.addEventListener('input', function () { range.value = number.value; update(); });
+    }
+
+    link(ordersR, ordersN);
+    link(aovR, aovN);
+    update();
+
+})();
+</script>
+{% endblock %}

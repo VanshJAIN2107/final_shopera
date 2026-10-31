@@ -1,0 +1,20 @@
+﻿{% comment %} Badge and wishlist heart that sit on top of a product picture. Needs `product` in the context. {% endcomment %}
+{% if product.discount_percent > 0 %}
+    <span class="pc-badge">-{{ product.discount_percent }}%</span>
+{% elif product.stock <= 0 %}
+    <span class="pc-badge pc-out">Sold out</span>
+{% endif %}
+
+{% if product.id in wishlist_ids %}
+    <a class="pc-wish on" href="{% url 'wishlist' %}" aria-label="In your wishlist" title="In your wishlist">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+    </a>
+{% else %}
+    <form class="pc-wish" method="post" action="{% url 'add_to_wishlist' product.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button type="submit" aria-label="Add to wishlist" title="Add to wishlist">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </button>
+    </form>
+{% endif %}

@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ site_name }} | Shop Smart</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        /* HOME - page specific layout (colors/components come from partials/theme.html) */
+
+        .page-wrap {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ---------- 3D HERO CAROUSEL ---------- */
+
+        .hero3d {
+            position: relative;
+            padding: 44px 0 150px;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 50% 0%, #6b4e3a 0%, transparent 60%),
+                linear-gradient(to bottom, #2b211c 0%, #3b2f2a 55%, var(--bg) 100%);
+        }
+
+        .h3-stage {
+            position: relative;
+            height: 410px;
+            max-width: 1300px;
+            margin: 0 auto;
+            perspective: 1700px;
+            perspective-origin: 50% 40%;
+            touch-action: pan-y;
+        }
+
+        .h3-card {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: min(860px, 86vw);
+            height: 390px;
+            transform-style: preserve-3d;
+            transition: transform .9s cubic-bezier(.22, .8, .24, 1), opacity .9s ease, filter .9s ease;
+            opacity: 0;
+            pointer-events: none;
+            will-change: transform;
+        }
+
+        .h3-card.pos-0 {
+            transform: translateX(-50%) translateZ(0) rotateY(0deg);
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 3;
+        }
+
+        .h3-card.pos-m1 {
+            transform: translateX(-50%) translateX(-58%) translateZ(-300px) rotateY(42deg) scale(.9);
+            opacity: .55;
+            filter: brightness(.7) blur(1px);
+            z-index: 2;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        .h3-card.pos-p1 {
+            transform: translateX(-50%) translateX(58%) translateZ(-300px) rotateY(-42deg) scale(.9);
+            opacity: .55;
+            filter: brightness(.7) blur(1px);
+            z-index: 2;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        .h3-card.pos-far { transform: translateX(-50%) translateZ(-700px) scale(.7); opacity: 0; z-index: 1; }
+
+        /* the card itself tilts with the mouse */
+
+        .h3-inner {
+            position: relative;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1.15fr .85fr;
+            align-items: center;
+            gap: 20px;
+            padding: 0 56px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, .18);
+            color: #fff;
+            overflow: visible;
+            transform-style: preserve-3d;
+            transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+            transition: transform .25s ease-out;
+            box-shadow: 0 40px 70px -20px rgba(0, 0, 0, .55), inset 0 1px rgba(255, 255, 255, .18);
+        }
+
+        .slide-1 .h3-inner { background: linear-gradient(125deg, #3b2f2a 0%, #7a5a44 100%); }
+        .slide-2 .h3-inner { background: linear-gradient(125deg, #7a5a3a 0%, #d0a468 100%); }
+        .slide-3 .h3-inner { background: linear-gradient(125deg, #2f4a3f 0%, #6a987f 100%); }
+
+        .h3-text { transform: translateZ(50px); }
+
+        .h3-text .eyebrow {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: #f3d9ae;
+        }
+
+        .h3-text h1 {
+            color: #fff;
+            font-size: clamp(30px, 3.8vw, 52px);
+            line-height: 1.08;
+            font-weight: 800;
+            margin: 12px 0 14px;
+            text-shadow: 0 10px 24px rgba(0, 0, 0, .35);
+        }
+
+        .h3-text p { color: #eadfce; font-size: 16.5px; max-width: 440px; margin-bottom: 24px; }
+
+        .hero-cta {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 999px;
+            background: #e8c58f;
+            color: #2b211c;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 14px 28px -8px rgba(0, 0, 0, .5);
+            transition: transform .2s, background .2s;
+        }
+
+        .hero-cta:hover { background: #f1d4a6; color: #2b211c; transform: translateY(-2px) translateZ(20px); }
+
+        /* floating product image popping out of the card */
+
+        .h3-visual {
+            position: relative;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        .h3-photo {
+            position: absolute;
+            right: 4%;
+            top: 50%;
+            width: 270px;
+            height: 270px;
+            margin-top: -135px;
+            border-radius: 26px;
+            overflow: hidden;
+            background: #f3ece1;
+            border: 6px solid #fff;
+            box-shadow: 0 40px 50px -14px rgba(0, 0, 0, .6);
+            transform: translateZ(110px) rotateY(-10deg) rotateZ(3deg);
+            animation: h3Bob 5s ease-in-out infinite;
+        }
+
+        .h3-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        .h3-photo.empty { display: flex; align-items: center; justify-content: center; font-size: 80px; }
+
+        @keyframes h3Bob {
+            0%, 100% { transform: translateZ(110px) rotateY(-10deg) rotateZ(3deg) translateY(0); }
+            50%      { transform: translateZ(110px) rotateY(-10deg) rotateZ(3deg) translateY(-12px); }
+        }
+
+        .h3-orb {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff4de, #e8c58f 55%, #b8864b);
+            box-shadow: 0 18px 24px -8px rgba(0, 0, 0, .5);
+            animation: h3Orb 6s ease-in-out infinite;
+        }
+
+        .h3-orb.o1 { width: 54px; height: 54px; right: 2%; top: 8%;  transform: translateZ(170px); }
+        .h3-orb.o2 { width: 28px; height: 28px; right: 46%; bottom: 10%; transform: translateZ(140px); animation-delay: -2s; }
+        .h3-orb.o3 { width: 38px; height: 38px; left: 2%; bottom: 14%; transform: translateZ(90px); animation-delay: -4s; }
+
+        @keyframes h3Orb {
+            0%, 100% { margin-top: 0; }
+            50%      { margin-top: -14px; }
+        }
+
+        /* nav arrows + dots */
+
+        .h3-btn {
+            position: absolute;
+            top: 175px;
+            z-index: 6;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, .35);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .14);
+            color: #fff;
+            font-size: 22px;
+            backdrop-filter: blur(6px);
+            cursor: pointer;
+            transition: background .2s, transform .2s;
+        }
+
+        .h3-btn:hover { background: rgba(255, 255, 255, .3); transform: scale(1.08); }
+        .h3-btn.prev { left: 22px; }
+        .h3-btn.next { right: 22px; }
+
+        .h3-dots {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 160px;
+            z-index: 6;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .h3-dots button {
+            width: 11px;
+            height: 11px;
+            padding: 0;
+            border: 0;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .4);
+            cursor: pointer;
+            transition: width .3s, background .3s;
+        }
+
+        .h3-dots button.on { width: 34px; background: #e8c58f; }
+        /* ---------- CATEGORY CARDS (overlap the banner) ---------- */
+
+        .cat-grid {
+            position: relative;
+            z-index: 4;
+            margin-top: -130px;
+        }
+
+        .cat-card {
+            height: 100%;
+            padding: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cat-card h3 {
+            font-family: 'Inter', sans-serif;
+            font-size: 19px;
+            font-weight: 700;
+            margin: 0 0 14px;
+        }
+
+        .cat-thumbs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .cat-thumbs a {
+            display: block;
+            aspect-ratio: 1 / 1;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg-alt);
+        }
+
+        .cat-thumbs img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .3s;
+        }
+
+        .cat-thumbs a:hover img { transform: scale(1.06); }
+
+        .cat-thumbs .thumb-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1 / 1;
+            border-radius: 8px;
+            background: var(--bg-alt);
+            font-size: 26px;
+        }
+
+        .cat-link {
+            display: inline-block;
+            margin-top: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .cat-link:hover { text-decoration: underline; }
+
+        /* ---------- SECTION HEADINGS ---------- */
+
+        .block {
+            margin-top: 28px;
+            padding: 22px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .block-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .block-head h2 {
+            font-family: 'Inter', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .block-head a { font-size: 14px; font-weight: 600; text-decoration: none; }
+        .block-head a:hover { text-decoration: underline; }
+
+        /* ---------- PRODUCT CARD ---------- */
+
+        .product-card {
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 14px;
+            background: var(--surface);
+            border: 1px solid transparent;
+            border-radius: 10px;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .product-card:hover {
+            border-color: var(--border);
+            box-shadow: var(--shadow-md);
+        }
+
+        .image-box {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg-alt);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .4s;
+        }
+
+        .product-card:hover .product-image { transform: scale(1.04); }
+
+        .product-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding-top: 12px;
+        }
+
+        .product-cat {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .product-name {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.35;
+            margin: 4px 0 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: calc(1.35em * 2);
+        }
+
+        .product-name a { color: var(--text); text-decoration: none; }
+        .product-card:hover .product-name a { color: var(--accent); }
+
+        /* whole card opens the product page */
+        .product-name a::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+
+        .product-price { margin-top: auto; padding-top: 6px; font-size: 18px; }
+
+        .product-card .az-meta { margin: 6px 0 12px; min-height: 18px; }
+
+        .product-actions { position: relative; z-index: 2; }
+
+        /* ---------- TRUST STRIP ---------- */
+
+        .trust {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 28px;
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 18px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .trust-icon {
+            width: 46px;
+            height: 46px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--accent-soft);
+            font-size: 21px;
+        }
+
+        .trust-item strong { display: block; font-size: 15px; }
+        .trust-item span   { font-size: 13px; color: var(--muted); }
+
+        /* ---------- RESPONSIVE ---------- */
+
+        @media (max-width: 991px) {
+            .hero3d { padding-bottom: 120px; }
+            .h3-stage { height: 430px; }
+            .h3-card { height: 410px; }
+            .h3-inner { grid-template-columns: 1fr; padding: 0 28px; text-align: left; }
+            .h3-visual { display: none; }
+            .h3-card.pos-m1 { transform: translateX(-50%) translateX(-52%) translateZ(-260px) rotateY(40deg) scale(.86); }
+            .h3-card.pos-p1 { transform: translateX(-50%) translateX(52%) translateZ(-260px) rotateY(-40deg) scale(.86); }
+            .h3-btn { top: 190px; width: 42px; height: 42px; }
+            .h3-btn.prev { left: 8px; }
+            .h3-btn.next { right: 8px; }
+            .cat-grid { margin-top: -90px; }
+            .trust { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 575px) {
+            .page-wrap { padding: 0 12px; }
+            .h3-text h1 { font-size: 28px; }
+            .h3-text p { font-size: 15px; }
+            .block { padding: 16px; }
+        }
+
+
+        /* ---------- 3D CATEGORY CARDS ---------- */
+
+        .cat-grid .row { perspective: 1500px; }
+
+        /* soft idle float, staggered per column */
+        .cat-grid .row > div { animation: catFloat 6s ease-in-out infinite; }
+        .cat-grid .row > div:nth-child(2) { animation-delay: -1.5s; }
+        .cat-grid .row > div:nth-child(3) { animation-delay: -3s; }
+        .cat-grid .row > div:nth-child(4) { animation-delay: -4.5s; }
+
+        @keyframes catFloat {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-7px); }
+        }
+
+        .cat-card {
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+            transition: transform .6s cubic-bezier(.2, .8, .2, 1), box-shadow .4s, opacity .8s;
+            will-change: transform;
+            box-shadow: 0 10px 26px -12px rgba(59, 47, 42, .35);
+        }
+
+        .cat-card.tilting {
+            transition: transform .12s ease-out, box-shadow .4s, opacity .8s;
+            box-shadow: 0 34px 50px -22px rgba(59, 47, 42, .55);
+        }
+
+        /* before it scrolls into view the card lies back and sinks */
+        .cat-card.pre {
+            opacity: 0;
+            transform: translateY(70px) rotateX(38deg) scale(.9);
+        }
+
+        /* layers float above the card surface */
+        .cat-card h3        { transform: translateZ(44px); }
+        .cat-card .cat-thumbs { transform: translateZ(30px); }
+        .cat-card .cat-link { transform: translateZ(36px); }
+
+        .cat-thumbs a {
+            box-shadow: 0 10px 18px -10px rgba(0, 0, 0, .5);
+            transition: transform .35s, box-shadow .35s;
+        }
+
+        .cat-card.tilting .cat-thumbs a:nth-child(odd)  { transform: translateZ(18px); }
+        .cat-card.tilting .cat-thumbs a:nth-child(even) { transform: translateZ(8px); }
+
+        /* light that follows the cursor */
+        .cat-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            opacity: 0;
+            background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .55), transparent 55%);
+            transition: opacity .3s;
+        }
+
+        .cat-card.tilting::after { opacity: 1; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .cat-grid .row > div { animation: none; }
+            .cat-card.pre { opacity: 1; transform: none; }
+        }
+
+        /* bigger carousel on large screens */
+        @media (min-width: 1600px) {
+            .h3-stage { height: 470px; }
+            .h3-card { width: 1040px; height: 450px; }
+            .h3-inner { padding: 0 72px; }
+            .h3-photo { width: 320px; height: 320px; margin-top: -160px; }
+            .h3-btn { top: 205px; }
+            .h3-dots { bottom: 150px; }
+        }
+
+        /* phones: only the active slide (the side ones would overlap its text) */
+        @media (max-width: 767px) {
+            .h3-card.pos-m1, .h3-card.pos-p1 { opacity: 0; pointer-events: none; }
+            .h3-card { width: 92vw; }
+            .h3-inner { padding: 0 22px; }
+        }
+        /* phones: arrows would cover the text (swipe + dots instead), categories become a swipe row */
+        @media (max-width: 767px) {
+            .h3-btn { display: none; }
+        }
+
+        @media (max-width: 575px) {
+            /* swipe row of category cards */
+            .cat-grid .row {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                margin-left: -12px;
+                margin-right: -12px;
+                padding: 4px 12px 14px;
+                scrollbar-width: none;
+                perspective: none;
+            }
+            .cat-grid .row::-webkit-scrollbar { display: none; }
+            .cat-grid .row > div { flex: 0 0 82%; max-width: 82%; scroll-snap-align: center; animation: none; }
+            .cat-card h3 { transform: none; }
+            .cat-card .cat-thumbs, .cat-card .cat-link { transform: none; }
+        }
+
+        @media (max-width: 991px) {
+            .product-card .btn-cart { padding: 8px 10px; font-size: 13px; }
+        }
+    </style>
+
+{% include 'partials/theme.html' %}
+</head>
+
+
+<body>
+
+{% include 'partials/navbar.html' with active='home' %}
+
+
+<main>
+
+    <!-- =================================================
+         3D HERO CAROUSEL
+    ================================================== -->
+
+    <section class="hero3d" id="hero3d" aria-roledescription="carousel" aria-label="Featured offers">
+
+        <div class="h3-stage" id="h3Stage">
+
+            <article class="h3-card slide-1" aria-label="1 of 3">
+                <div class="h3-inner">
+                    <div class="h3-text">
+                        <span class="eyebrow">New collection 2026</span>
+                        <h1>Shop better. Live better.</h1>
+                        <p>Quality products, stylish collections and amazing prices, all in one place.</p>
+                        <a href="{% url 'products' %}" class="hero-cta">Shop now</a>
+                    </div>
+                    <div class="h3-visual" aria-hidden="true">
+                        {% with p=products.0 %}
+                            <div class="h3-photo{% if not p.image %} empty{% endif %}">{% if p.image %}<img src="{{ p.image.url }}" alt="">{% else %}🛍️{% endif %}</div>
+                        {% endwith %}
+                        <span class="h3-orb o1"></span><span class="h3-orb o2"></span><span class="h3-orb o3"></span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="h3-card slide-2" aria-label="2 of 3">
+                <div class="h3-inner">
+                    <div class="h3-text">
+                        <span class="eyebrow">Free delivery</span>
+                        <h1>Delivered free to your doorstep.</h1>
+                        <p>Quick and reliable delivery on every order, with cash on delivery available.</p>
+                        <a href="{% url 'products' %}" class="hero-cta">Browse products</a>
+                    </div>
+                    <div class="h3-visual" aria-hidden="true">
+                        {% with p=products.4 %}
+                            <div class="h3-photo{% if not p.image %} empty{% endif %}">{% if p.image %}<img src="{{ p.image.url }}" alt="">{% else %}🚚{% endif %}</div>
+                        {% endwith %}
+                        <span class="h3-orb o1"></span><span class="h3-orb o2"></span><span class="h3-orb o3"></span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="h3-card slide-3" aria-label="3 of 3">
+                <div class="h3-inner">
+                    <div class="h3-text">
+                        <span class="eyebrow">Secure shopping</span>
+                        <h1>Pay your way, stay protected.</h1>
+                        <p>Cash on delivery or UPI / Razorpay, your account and orders stay safe.</p>
+                        <a href="{% url 'products' %}" class="hero-cta">Start shopping</a>
+                    </div>
+                    <div class="h3-visual" aria-hidden="true">
+                        {% with p=products.9 %}
+                            <div class="h3-photo{% if not p.image %} empty{% endif %}">{% if p.image %}<img src="{{ p.image.url }}" alt="">{% else %}🔒{% endif %}</div>
+                        {% endwith %}
+                        <span class="h3-orb o1"></span><span class="h3-orb o2"></span><span class="h3-orb o3"></span>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+
+        <button type="button" class="h3-btn prev" id="h3Prev" aria-label="Previous slide">&#8249;</button>
+        <button type="button" class="h3-btn next" id="h3Next" aria-label="Next slide">&#8250;</button>
+
+        <div class="h3-dots" id="h3Dots" role="tablist" aria-label="Choose slide"></div>
+
+    </section>
+
+
+    <div class="page-wrap">
+
+        <!-- =================================================
+             CATEGORY CARDS
+        ================================================== -->
+
+        <section id="categories" class="cat-grid">
+
+            <div class="row g-3">
+
+                {% for category in categories|slice:":4" %}
+
+                    <div class="col-12 col-sm-6 col-xl-3">
+
+                        <div class="cat-card">
+
+                            <h3>{{ category.name }}</h3>
+
+                            <div class="cat-thumbs">
+
+                                {% for p in category.products.all|slice:":4" %}
+
+                                    <a href="{% url 'product_detail' p.slug %}" aria-label="{{ p.name }}">
+                                        {% if p.image %}
+                                            <img src="{{ p.image.url }}" alt="{{ p.name }}" loading="lazy">
+                                        {% else %}
+                                            <span class="thumb-empty">📦</span>
+                                        {% endif %}
+                                    </a>
+
+                                {% empty %}
+
+                                    <span class="thumb-empty">🛍️</span>
+
+                                {% endfor %}
+
+                            </div>
+
+                            <a href="{% url 'products' %}?category={{ category.slug }}" class="cat-link">
+                                See all in {{ category.name }} →
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% empty %}
+
+                    <div class="col-12">
+                        <div class="cat-card text-center text-secondary">No categories available.</div>
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             PRODUCTS
+        ================================================== -->
+
+        {% if deals %}
+        <section id="deals" class="block">
+
+            <div class="block-head">
+
+                <h2>Today's deals</h2>
+
+                <a href="{% url 'products' %}?deals=1">See all deals</a>
+
+            </div>
+
+            <div class="row g-3">
+
+                {% for product in deals %}
+
+                    <div class="col-6 col-md-4 col-xl-3 col-xxl-2">
+
+                        <article class="product-card">
+
+                            <div class="image-box">
+                                {% include 'partials/card_badges.html' %}
+
+                                {% if product.image %}
+                                    <img
+                                        src="{{ product.image.url }}"
+                                        class="product-image"
+                                        alt="{{ product.name }}"
+                                        loading="lazy"
+                                    >
+                                {% else %}
+                                    <span class="fs-1">📦</span>
+                                {% endif %}
+
+                            </div>
+
+                            <div class="product-body">
+
+                                <span class="product-cat">{{ product.category.name }}</span>
+
+                                <h3 class="product-name">
+                                    <a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a>
+                                </h3>
+
+                                {% if product.review_count > 0 %}
+                                    <div class="mb-1"><span class="rating"><span class="stars" title="{{ product.avg_rating|floatformat:1 }} out of 5"><span class="f{% widthratio product.avg_rating 5 10 %}"></span></span> <span>({{ product.review_count }})</span></span></div>
+                                {% endif %}
+
+                                <div class="product-price">
+                                    <span class="az-price"><span class="sym">₹</span><span class="amt">{{ product.price|floatformat:"0" }}</span></span>
+                                    {% if product.discount_percent > 0 %}
+                                        <span class="az-mrp">₹{{ product.mrp|floatformat:"0" }}</span>
+                                        <span class="badge-discount">-{{ product.discount_percent }}%</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="az-meta">
+                                    {% if product.stock > 0 %}
+                                        <strong>FREE delivery</strong>
+                                    {% else %}
+                                        <span class="text-danger">Currently unavailable</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="product-actions">
+
+                                    {% if product.stock > 0 %}
+
+                                        <form method="post" action="{% url 'add_to_cart' product.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit" class="btn-cart">Add to Cart</button>
+                                        </form>
+
+                                    {% else %}
+
+                                        <button type="button" class="btn-cart" disabled>Sold out</button>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+        {% endif %}
+
+        <section id="products" class="block">
+
+            <div class="block-head">
+
+                <h2>Featured products</h2>
+
+                <a href="{% url 'products' %}">See all products</a>
+
+            </div>
+
+            <div class="row g-3">
+
+                {% for product in products %}
+
+                    <div class="col-6 col-md-4 col-xl-3 col-xxl-2">
+
+                        <article class="product-card">
+
+                            <div class="image-box">
+                                {% include 'partials/card_badges.html' %}
+
+                                {% if product.image %}
+                                    <img
+                                        src="{{ product.image.url }}"
+                                        class="product-image"
+                                        alt="{{ product.name }}"
+                                        loading="lazy"
+                                    >
+                                {% else %}
+                                    <span class="fs-1">📦</span>
+                                {% endif %}
+
+                            </div>
+
+                            <div class="product-body">
+
+                                <span class="product-cat">{{ product.category.name }}</span>
+
+                                <h3 class="product-name">
+                                    <a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a>
+                                </h3>
+
+                                {% if product.review_count > 0 %}
+                                    <div class="mb-1"><span class="rating"><span class="stars" title="{{ product.avg_rating|floatformat:1 }} out of 5"><span class="f{% widthratio product.avg_rating 5 10 %}"></span></span> <span>({{ product.review_count }})</span></span></div>
+                                {% endif %}
+
+                                <div class="product-price">
+                                    <span class="az-price"><span class="sym">₹</span><span class="amt">{{ product.price|floatformat:"0" }}</span></span>
+                                    {% if product.discount_percent > 0 %}
+                                        <span class="az-mrp">₹{{ product.mrp|floatformat:"0" }}</span>
+                                        <span class="badge-discount">-{{ product.discount_percent }}%</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="az-meta">
+                                    {% if product.stock > 0 %}
+                                        <strong>FREE delivery</strong>
+                                    {% else %}
+                                        <span class="text-danger">Currently unavailable</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="product-actions">
+
+                                    {% if product.stock > 0 %}
+
+                                        <form method="post" action="{% url 'add_to_cart' product.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit" class="btn-cart">Add to Cart</button>
+                                        </form>
+
+                                    {% else %}
+
+                                        <button type="button" class="btn-cart" disabled>Sold out</button>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                {% empty %}
+
+                    <div class="col-12 text-center p-5">
+                        <h4>No products available</h4>
+                        <p class="text-secondary">Products will appear here soon.</p>
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             TRUST STRIP
+        ================================================== -->
+
+        <section class="trust">
+
+            <div class="trust-item">
+                <div class="trust-icon">🚚</div>
+                <div><strong>Fast delivery</strong><span>Quick and reliable, to your doorstep</span></div>
+            </div>
+
+            <div class="trust-item">
+                <div class="trust-icon">🔒</div>
+                <div><strong>Secure shopping</strong><span>Your account and orders stay protected</span></div>
+            </div>
+
+            <div class="trust-item">
+                <div class="trust-icon">💎</div>
+                <div><strong>Quality products</strong><span>Carefully selected, at great prices</span></div>
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+
+<script>
+(function () {
+
+    var stage = document.getElementById('h3Stage');
+    if (!stage) return;
+
+    var cards = Array.prototype.slice.call(stage.querySelectorAll('.h3-card'));
+    var dotsBox = document.getElementById('h3Dots');
+    var total = cards.length;
+    var current = 0;
+    var timer = null;
+    var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    cards.forEach(function (card, i) {
+        var dot = document.createElement('button');
+        dot.type = 'button';
+        dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+        dot.addEventListener('click', function () { go(i, true); });
+        dotsBox.appendChild(dot);
+
+        card.addEventListener('click', function () {
+            if (card.classList.contains('pos-m1')) go(i, true);
+            if (card.classList.contains('pos-p1')) go(i, true);
+        });
+    });
+
+    var dots = Array.prototype.slice.call(dotsBox.children);
+
+    function render() {
+        cards.forEach(function (card, i) {
+            var offset = ((i - current) % total + total) % total;     // 0..total-1
+            if (offset > total / 2) offset -= total;                    // -x .. +x
+
+            card.classList.remove('pos-0', 'pos-m1', 'pos-p1', 'pos-far');
+            card.classList.add(offset === 0 ? 'pos-0' : offset === -1 ? 'pos-m1' : offset === 1 ? 'pos-p1' : 'pos-far');
+            card.setAttribute('aria-hidden', offset === 0 ? 'false' : 'true');
+
+            card.querySelectorAll('a').forEach(function (a) { a.tabIndex = offset === 0 ? 0 : -1; });
+
+            if (offset !== 0) {
+                card.firstElementChild.style.setProperty('--rx', '0deg');
+                card.firstElementChild.style.setProperty('--ry', '0deg');
+            }
+        });
+
+        dots.forEach(function (dot, i) { dot.classList.toggle('on', i === current); });
+    }
+
+    function go(index, user) {
+        current = ((index % total) + total) % total;
+        render();
+        if (user) restart();
+    }
+
+    function next() { go(current + 1); }
+    function prev() { go(current - 1); }
+
+    function restart() {
+        clearInterval(timer);
+        if (!reduced) timer = setInterval(next, 5500);
+    }
+
+    document.getElementById('h3Next').addEventListener('click', function () { go(current + 1, true); });
+    document.getElementById('h3Prev').addEventListener('click', function () { go(current - 1, true); });
+
+    // pause while the pointer is over the carousel
+    var hero = document.getElementById('hero3d');
+    hero.addEventListener('mouseenter', function () { clearInterval(timer); });
+    hero.addEventListener('mouseleave', restart);
+
+    // 3D tilt of the active card following the mouse
+    stage.addEventListener('mousemove', function (e) {
+        if (reduced) return;
+        var active = stage.querySelector('.pos-0 .h3-inner');
+        if (!active) return;
+        var box = stage.getBoundingClientRect();
+        var x = (e.clientX - box.left) / box.width - 0.5;
+        var y = (e.clientY - box.top) / box.height - 0.5;
+        active.style.setProperty('--ry', (x * 9) + 'deg');
+        active.style.setProperty('--rx', (-y * 7) + 'deg');
+    });
+
+    stage.addEventListener('mouseleave', function () {
+        var active = stage.querySelector('.pos-0 .h3-inner');
+        if (!active) return;
+        active.style.setProperty('--ry', '0deg');
+        active.style.setProperty('--rx', '0deg');
+    });
+
+    // swipe on touch screens
+    var startX = null;
+    stage.addEventListener('pointerdown', function (e) { startX = e.clientX; });
+    stage.addEventListener('pointerup', function (e) {
+        if (startX === null) return;
+        var dx = e.clientX - startX;
+        startX = null;
+        if (Math.abs(dx) > 50) go(current + (dx < 0 ? 1 : -1), true);
+    });
+
+    // keyboard
+    hero.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight') go(current + 1, true);
+        if (e.key === 'ArrowLeft') go(current - 1, true);
+    });
+
+    render();
+    restart();
+
+})();
+</script>
+<script>
+(function () {
+
+    var cards = Array.prototype.slice.call(document.querySelectorAll('.cat-card'));
+    if (!cards.length) return;
+
+    var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // 3D entrance when the section scrolls into view (cards rise one after another)
+    if (!reduced && 'IntersectionObserver' in window) {
+
+        cards.forEach(function (card, i) {
+            card.classList.add('pre');
+            card.style.transitionDelay = (i * 0.12) + 's';
+        });
+
+        var seen = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                var card = entry.target;
+                card.classList.remove('pre');
+                seen.unobserve(card);
+                // delay only applies to the entrance
+                setTimeout(function () { card.style.transitionDelay = ''; }, 1200);
+            });
+        }, { threshold: 0.12 });
+
+        cards.forEach(function (card) { seen.observe(card); });
+    }
+
+    // mouse tilt: the card turns toward the pointer, layers inside float forward
+    if (reduced) return;
+
+    cards.forEach(function (card) {
+
+        card.addEventListener('pointermove', function (e) {
+            if (e.pointerType !== 'mouse') return;
+
+            var box = card.getBoundingClientRect();
+            var x = (e.clientX - box.left) / box.width;
+            var y = (e.clientY - box.top) / box.height;
+
+            card.classList.add('tilting');
+            card.style.setProperty('--ry', ((x - 0.5) * 22) + 'deg');
+            card.style.setProperty('--rx', ((0.5 - y) * 18) + 'deg');
+            card.style.setProperty('--mx', (x * 100) + '%');
+            card.style.setProperty('--my', (y * 100) + '%');
+        });
+
+        card.addEventListener('pointerleave', function () {
+            card.classList.remove('tilting');
+            card.style.setProperty('--rx', '0deg');
+            card.style.setProperty('--ry', '0deg');
+        });
+    });
+
+})();
+</script>
+{% include 'partials/footer.html' %}
+
+</body>
+
+</html>

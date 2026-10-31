@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Us | {{ site_name }}{% endblock %}
+{% block meta_description %}Contact {{ site_name }} for help with orders, products, returns and more.{% endblock %}
+
+{% block content %}
+<section class="page-header-bar">
+    <div class="container">
+        <h1>Contact Us</h1>
+        <p>We would love to hear from you</p>
+    </div>
+</section>
+
+<div class="container" style="max-width:1000px; padding-top:40px;">
+    <div class="row g-4">
+        <div class="col-md-5">
+            <div class="surface p-4 h-100">
+                <h2 class="h4 mb-3">Get in touch</h2>
+                <p class="text-muted">Have a question about an order, a product, or a return? Send us a message using the form and our team will help you out.</p>
+                <p class="mb-2"><strong>Response time</strong><br>We usually reply within 24 hours.</p>
+                <p class="mb-0 text-muted">Replies are sent to the email address you provide in the form.</p>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <form method="post" action="{% url 'contact' %}" class="surface p-4">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="c-name" class="form-label">Name</label>
+                    <input type="text" id="c-name" name="name" class="form-control" value="{{ form.name }}" required maxlength="100">
+                </div>
+                <div class="mb-3">
+                    <label for="c-email" class="form-label">Email</label>
+                    <input type="email" id="c-email" name="email" class="form-control" value="{{ form.email }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="c-message" class="form-label">Message</label>
+                    <textarea id="c-message" name="message" rows="6" class="form-control" required>{{ form.message }}</textarea>
+                </div>
+                <div style="position:absolute; left:-9999px;" aria-hidden="true">
+                    <label>Leave this field empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+                </div>
+                <button type="submit" class="btn-theme">Send message</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

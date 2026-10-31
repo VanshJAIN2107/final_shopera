@@ -1,0 +1,41 @@
+{% extends 'panel/base.html' %}
+
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <h2>{% if category %}Edit category{% else %}Add category{% endif %}</h2>
+        <p>{% if category %}{{ category.name }}{% else %}Create a new product category{% endif %}</p>
+    </div>
+</div>
+
+<form method="post" class="data-card form-card" style="max-width:520px;">
+    {% csrf_token %}
+    <div class="data-card-body">
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="mb-3">
+            <label class="form-label" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+            {{ form.name }}
+            {{ form.name.errors }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="{{ form.slug.id_for_label }}">{{ form.slug.label }}</label>
+            {{ form.slug }}
+            {% if form.slug.help_text %}<span class="help">{{ form.slug.help_text }}</span>{% endif %}
+            {{ form.slug.errors }}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-p">Save</button>
+            <a href="{% url 'panel_categories' %}" class="btn-p-outline">Cancel</a>
+        </div>
+
+    </div>
+</form>
+
+{% endblock %}

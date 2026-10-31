@@ -1,0 +1,161 @@
+{% extends 'panel/base.html' %}
+
+{% block head_extra %}
+<style>
+    .coupon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 20px; }
+    .coupon-grid .full { grid-column: 1 / -1; }
+    @media (max-width: 700px) { .coupon-grid { grid-template-columns: 1fr; } }
+
+    .switch-row { display: flex; align-items: center; gap: 12px; }
+    .switch-row input[type=checkbox] {
+        appearance: none; -webkit-appearance: none;
+        width: 44px; height: 24px; padding: 0; margin: 0; flex: none;
+        border-radius: 999px; background: #d1d5db; position: relative; cursor: pointer;
+        border: 0; transition: background .15s;
+    }
+    .switch-row input[type=checkbox]::after {
+        content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+        border-radius: 50%; background: #fff; transition: transform .15s;
+    }
+    .switch-row input[type=checkbox]:checked { background: #9a6b3f; }
+    .switch-row input[type=checkbox]:checked::after { transform: translateX(20px); }
+
+    .preview-card {
+        margin-top: 22px; padding: 14px 16px; border-radius: 10px;
+        background: #f6ecdc; border: 1px dashed #d6c9b4; color: #4a3b33; font-size: 14px;
+    }
+    .preview-card .code-chip { font-family: Consolas, "Courier New", monospace; font-weight: 700; letter-spacing: .04em; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <h2>{% if coupon %}Edit coupon{% else %}New coupon{% endif %}</h2>
+        <p>{% if coupon %}Changes apply to new checkouts immediately.{% else %}Create a discount code customers can use at checkout.{% endif %}</p>
+    </div>
+</div>
+
+<div class="data-card form-card">
+    <div class="data-card-body">
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="coupon-grid">
+
+                <div>
+                    <label class="form-label" for="{{ form.code.id_for_label }}">Coupon code</label>
+                    {{ form.code }}
+                    <span class="help">Letters and numbers, no spaces. Saved in capitals.</span>
+                    {{ form.code.errors }}
+                </div>
+
+                <div>
+                    <label class="form-label" for="{{ form.discount_percent.id_for_label }}">Discount (%)</label>
+                    {{ form.discount_percent }}
+                    <span class="help">Percentage off, 1 to 100.</span>
+                    {{ form.discount_percent.errors }}
+                </div>
+
+                <div>
+                    <label class="form-label" for="{{ form.max_discount.id_for_label }}">Maximum discount (&#8377;)</label>
+                    {{ form.max_discount }}
+                    <span class="help">Optional cap on the discount amount.</span>
+                    {{ form.max_discount.errors }}
+                </div>
+
+                <div>
+                    <label class="form-label" for="{{ form.min_order_amount.id_for_label }}">Minimum order (&#8377;)</label>
+                    {{ form.min_order_amount }}
+                    <span class="help">Order subtotal needed to use the coupon. 0 for none.</span>
+                    {{ form.min_order_amount.errors }}
+                </div>
+
+                <div>
+                    <label class="form-label" for="{{ form.valid_from.id_for_label }}">Valid from</label>
+                    {{ form.valid_from }}
+                    <span class="help">Optional. Leave empty to start immediately.</span>
+                    {{ form.valid_from.errors }}
+                </div>
+
+                <div>
+                    <label class="form-label" for="{{ form.valid_to.id_for_label }}">Valid until</label>
+                    {{ form.valid_to }}
+                    <span class="help">Optional. Leave empty for no expiry.</span>
+                    {{ form.valid_to.errors }}
+                </div>
+
+                <div>
+                    <label class="form-label" for="{{ form.usage_limit.id_for_label }}">Usage limit</label>
+                    {{ form.usage_limit }}
+                    <span class="help">Total times the coupon can be used. Leave empty for unlimited.</span>
+                    {{ form.usage_limit.errors }}
+                </div>
+
+                <div>
+                    <label class="form-label" for="{{ form.active.id_for_label }}">Status</label>
+                    <div class="switch-row">
+                        {{ form.active }}
+                        <label for="{{ form.active.id_for_label }}" class="mb-0">Active (customers can use it)</label>
+                    </div>
+                    {{ form.active.errors }}
+                </div>
+
+            </div>
+
+            <div class="preview-card" id="couponPreview" aria-live="polite"></div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-p"><i class="bi bi-check-lg"></i> Save</button>
+                <a href="{% url 'panel_coupons' %}" class="btn-p-outline">Cancel</a>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
+        var f = function (n) { return document.getElementById('id_' + n); };
+        var box = document.getElementById('couponPreview');
+
+        function esc(s) {
+            return s.replace(/[&<>"]/g, function (c) {
+                return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c];
+            });
+        }
+
+        function render() {
+            var code = (f('code').value || 'CODE').trim().toUpperCase().replace(/\s+/g, '');
+            var pct = f('discount_percent').value;
+            var max = parseFloat(f('max_discount').value);
+            var min = parseFloat(f('min_order_amount').value);
+            var limit = f('usage_limit').value;
+            var to = f('valid_to').value;
+
+            var t = '<i class="bi bi-eye"></i> Preview: <span class="code-chip">' + esc(code) + '</span> gives ' + (pct || '?') + '% off';
+            if (max > 0) t += ', up to &#8377;' + max;
+            t += min > 0 ? ', on orders above &#8377;' + min : ', on any order';
+            if (to) t += ', until ' + esc(to.replace('T', ' '));
+            if (limit) t += ', limited to ' + esc(limit) + ' uses';
+            if (!f('active').checked) t += ' (currently inactive)';
+            box.innerHTML = t + '.';
+        }
+
+        ['code', 'discount_percent', 'max_discount', 'min_order_amount', 'valid_to', 'usage_limit', 'active'].forEach(function (n) {
+            var el = f(n);
+            if (el) { el.addEventListener('input', render); el.addEventListener('change', render); }
+        });
+        render();
+    })();
+</script>
+{% endblock %}

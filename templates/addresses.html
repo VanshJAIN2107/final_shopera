@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}My Addresses | {{ site_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .addr-wrap { max-width: 1100px; margin: 0 auto; padding: 36px 16px 0; }
+    .addr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; }
+    .addr-card { padding: 22px; display: flex; flex-direction: column; }
+    .addr-card.is-default { border-color: var(--accent); }
+    .addr-card h3 { font-size: 19px; margin: 0; }
+    .addr-text { color: #4d443d; line-height: 1.6; font-size: 14px; margin: 10px 0 4px; flex: 1; }
+    .addr-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .addr-actions form { margin: 0; }
+    .addr-actions .btn { border-radius: 999px; font-size: 13px; font-weight: 600; padding: 6px 14px; }
+    .addr-add {
+        min-height: 200px; align-items: center; justify-content: center; text-align: center;
+        border: 2px dashed var(--border-strong); background: transparent; box-shadow: none;
+        color: var(--primary); text-decoration: none; font-weight: 700; font-size: 18px; gap: 6px;
+    }
+    .addr-add:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--primary); }
+    .addr-add .plus { font-size: 38px; line-height: 1; color: var(--accent); }
+    .empty-state { padding: 40px 20px; text-align: center; margin-bottom: 20px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="addr-wrap">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <h1 class="mb-0" style="font-size:32px;font-weight:800;">My Addresses</h1>
+        <a href="{% url 'profile' %}" class="btn-theme-outline">Back to account</a>
+    </div>
+
+    {% if not addresses %}
+        <div class="surface empty-state">
+            <h3>No saved addresses yet</h3>
+            <p class="text-muted mb-0">Add an address to check out faster next time.</p>
+        </div>
+    {% endif %}
+
+    <div class="addr-grid">
+        {% for a in addresses %}
+            <div class="surface addr-card {% if a.is_default %}is-default{% endif %}">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <h3>{{ a.full_name }}</h3>
+                    {% if a.is_default %}<span class="badge-soft">Default</span>{% endif %}
+                </div>
+                <div class="addr-text">
+                    {{ a.full_address }}<br>
+                    <span class="text-muted">Phone: {{ a.phone }}</span>
+                </div>
+                <div class="addr-actions">
+                    <a href="{% url 'address_edit' a.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    <form method="POST" action="{% url 'address_delete' a.id %}" onsubmit="return confirm('Delete this address?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                    {% if not a.is_default %}
+                        <form method="POST" action="{% url 'address_default' a.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">Set as default</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+
+        <a href="{% url 'address_add' %}" class="surface addr-card addr-add">
+            <span class="plus">+</span>
+            <span>Add new address</span>
+        </a>
+    </div>
+</div>
+{% endblock %}

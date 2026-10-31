@@ -1,0 +1,85 @@
+{% extends 'panel/base.html' %}
+
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <h2>Back-in-stock requests</h2>
+        <p>Customers asked to be emailed when these products return. They are emailed automatically when you raise the stock above 0.</p>
+    </div>
+</div>
+
+<div class="data-card">
+    <div class="data-card-head"><h5>Waiting for restock</h5></div>
+    {% if waiting %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th class="num">People waiting</th>
+                    <th class="num">Current stock</th>
+                    <th class="actions">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for w in waiting %}
+                <tr>
+                    <td><a class="cell-title" href="{% url 'panel_product_edit' w.product_id %}">{{ w.product__name }}</a></td>
+                    <td class="num">{{ w.people }}</td>
+                    <td class="num"><span class="badge-s {% if w.product__stock == 0 %}badge-bad{% else %}badge-ok{% endif %}">{{ w.product__stock }}</span></td>
+                    <td class="actions"><a href="{% url 'panel_product_edit' w.product_id %}" class="btn-p-outline btn-p-sm"><i class="bi bi-box-seam"></i> Restock</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-bell"></i>
+        <p class="mb-0">Nobody is waiting for a restock right now.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="data-card">
+    <div class="data-card-head"><h5>Recent requests</h5></div>
+    {% if recent %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Product</th>
+                    <th>Requested</th>
+                    <th>Status</th>
+                    <th class="actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in recent %}
+                <tr>
+                    <td>{{ a.email }}</td>
+                    <td>{{ a.product.name }}</td>
+                    <td class="text-nowrap">{{ a.created_at|date:"d M Y, H:i" }}</td>
+                    <td><span class="badge-s {% if a.notified %}badge-ok{% else %}badge-warn{% endif %}">{% if a.notified %}Notified{% else %}Waiting{% endif %}</span></td>
+                    <td class="actions">
+                        <form method="post" action="{% url 'panel_alert_delete' a.id %}" onsubmit="return confirm('Remove this request?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-p-danger btn-p-sm"><i class="bi bi-trash"></i> Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <p class="mb-0">No requests yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

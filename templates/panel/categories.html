@@ -1,0 +1,55 @@
+{% extends 'panel/base.html' %}
+
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <h2>Categories</h2>
+        <p>{{ categories|length }} categor{{ categories|length|pluralize:"y,ies" }}</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'panel_category_add' %}" class="btn-p"><i class="bi bi-plus-lg"></i> Add category</a>
+    </div>
+</div>
+
+<div class="data-card">
+    {% if categories %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Slug</th>
+                    <th class="num">Products</th>
+                    <th class="actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in categories %}
+                <tr>
+                    <td><a href="{% url 'panel_category_edit' c.id %}" class="cell-title">{{ c.name }}</a></td>
+                    <td><span class="cell-sub">{{ c.slug }}</span></td>
+                    <td class="num"><a href="{% url 'panel_products' %}?category={{ c.id }}">{{ c.product_count }}</a></td>
+                    <td class="actions">
+                        <a href="{% url 'panel_category_edit' c.id %}" class="btn-p-sm btn-p-outline">Edit</a>
+                        <form method="post" action="{% url 'panel_category_delete' c.id %}" onsubmit="return confirm('Delete this category?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-p-sm btn-p-danger"
+                                {% if c.product_count > 0 %}disabled title="Move or delete its products first"{% endif %}>Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-tags"></i>
+        <p>No categories yet.</p>
+        <a href="{% url 'panel_category_add' %}" class="btn-p"><i class="bi bi-plus-lg"></i> Add category</a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

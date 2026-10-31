@@ -1,0 +1,163 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}Orders{% endblock %}
+
+{% block head_extra %}
+<style>
+    .row-status { display: inline-flex; align-items: center; gap: 4px; }
+    .row-status select { width: auto; min-width: 110px; padding: 3px 24px 3px 8px; font-size: 12px; }
+    .row-status button { padding: 3px 8px; font-size: 12px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <h2>Orders</h2>
+        <p>{{ total_orders }} order{{ total_orders|pluralize }} in total. Track, filter and update them here.</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'panel_orders_export' %}?{{ querystring }}" class="btn-p-outline"><i class="bi bi-download"></i> Export CSV</a>
+    </div>
+</div>
+
+<div class="tabs">
+    <a href="?" class="{% if not status %}active{% endif %}">All<span class="n">{{ total_orders }}</span></a>
+    {% for value, label in status_choices %}
+    <a href="?status={{ value }}" class="{% if status == value %}active{% endif %}">{{ label }}<span class="n">{% for key, n in status_counts.items %}{% if key == value %}{{ n }}{% endif %}{% endfor %}{% if value not in status_counts %}0{% endif %}</span></a>
+    {% endfor %}
+</div>
+
+<form method="get" class="toolbar">
+    <input type="hidden" name="status" value="{{ status }}">
+
+    <div class="field grow">
+        <label for="f-q">Search</label>
+        <input type="text" id="f-q" name="q" value="{{ query }}" class="form-control" placeholder="Order #, name, phone, email">
+    </div>
+
+    <div class="field">
+        <label for="f-payment">Payment</label>
+        <select id="f-payment" name="payment" class="form-select">
+            <option value="">All</option>
+            {% for value, label in payment_choices %}
+            <option value="{{ value }}" {% if payment == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="field">
+        <label for="f-method">Method</label>
+        <select id="f-method" name="method" class="form-select">
+            <option value="">All</option>
+            {% for value, label in method_choices %}
+            <option value="{{ value }}" {% if method == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="field">
+        <label for="f-from">From</label>
+        <input type="date" id="f-from" name="from" value="{{ date_from }}" class="form-control">
+    </div>
+
+    <div class="field">
+        <label for="f-to">To</label>
+        <input type="date" id="f-to" name="to" value="{{ date_to }}" class="form-control">
+    </div>
+
+    <div class="field">
+        <label>&nbsp;</label>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn-p"><i class="bi bi-funnel"></i> Filter</button>
+            <a href="{% url 'panel_orders' %}" class="btn-p-outline">Clear</a>
+        </div>
+    </div>
+</form>
+
+<div class="data-card">
+    {% if page_obj.object_list %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th class="num">Items</th>
+                    <th class="num">Total</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Change status</th>
+                    <th class="actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for o in page_obj %}
+                <tr>
+                    <td><a class="cell-title" href="{% url 'panel_order_detail' o.id %}">#{{ o.id }}</a></td>
+                    <td>{{ o.created_at|date:"d M Y" }}<span class="cell-sub">{{ o.created_at|date:"h:i A" }}</span></td>
+                    <td>
+                        <span class="cell-title">{{ o.full_name }}</span>
+                        <span class="cell-sub">{{ o.user.username }}</span>
+                    </td>
+                    <td class="num">{{ o.item_count }}</td>
+                    <td class="num">
+                        <strong>₹{{ o.total_amount|floatformat:2 }}</strong>
+                        {% if o.coupon_code %}<span class="cell-sub">Coupon {{ o.coupon_code }}</span>{% endif %}
+                    </td>
+                    <td>
+                        <span class="badge-s {% if o.payment_status == 'Paid' %}badge-ok{% elif o.payment_status == 'Failed' %}badge-bad{% else %}badge-warn{% endif %}">{{ o.payment_status }}</span>
+                        <span class="cell-sub">{{ o.get_payment_method_display }}</span>
+                    </td>
+                    <td>
+                        <span class="badge-s {% if o.status == 'Delivered' %}badge-ok{% elif o.status == 'Cancelled' %}badge-bad{% elif o.status == 'Shipped' %}badge-blue{% elif o.status == 'Processing' %}badge-info{% else %}badge-warn{% endif %}">{{ o.status }}</span>
+                    </td>
+                    <td>
+                        <form method="post" action="{% url 'panel_order_update' o.id %}" class="row-status">
+                            {% csrf_token %}
+                            <input type="hidden" name="payment_status" value="{{ o.payment_status }}">
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <select name="status" class="form-select" aria-label="Status for order {{ o.id }}">
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if o.status == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn-p-outline btn-p-sm">Update</button>
+                        </form>
+                    </td>
+                    <td class="actions">
+                        <a href="{% url 'panel_order_detail' o.id %}" class="btn-p-outline btn-p-sm"><i class="bi bi-eye"></i> View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pager-p">
+        <span>Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
+        <div class="links">
+            {% if page_obj.has_previous %}
+            <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Prev</a>
+            {% else %}
+            <span class="pg disabled">Prev</span>
+            {% endif %}
+            <span class="pg current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+            <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+            {% else %}
+            <span class="pg disabled">Next</span>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-bag"></i>
+        <p class="mb-0">No orders match your filters.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Access denied | {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container text-center" style="max-width:600px; padding:70px 20px 0;">
+    <div class="font-display" style="font-size:110px; font-weight:800; line-height:1; color:var(--accent);">403</div>
+    <h1 class="h3 mt-3">You don't have permission</h1>
+    <p class="text-muted">You are not allowed to view this page. If you think this is a mistake, try signing in with the right account.</p>
+    <form method="get" action="{% url 'products' %}" class="d-flex gap-2 my-4">
+        <input type="text" name="q" class="form-control" placeholder="Search products" aria-label="Search products">
+        <button type="submit" class="btn-theme">Search</button>
+    </form>
+    <a href="{% url 'home' %}" class="btn-theme">Back to home</a>
+    <a href="{% url 'products' %}" class="btn-theme-outline ms-2">Browse products</a>
+</div>
+{% endblock %}

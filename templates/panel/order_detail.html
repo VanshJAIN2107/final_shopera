@@ -1,0 +1,194 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}Order #{{ order.id }}{% endblock %}
+
+{% block head_extra %}
+<style>
+    .mono { font-family: Consolas, monospace; font-size: 12px; }
+    .totals td { border-bottom: 0; padding-top: 6px; padding-bottom: 6px; }
+    .totals tr.grand td { border-top: 1px solid #e5e7eb; font-size: 16px; padding-top: 12px; }
+    .help-text { display: block; font-size: 12px; color: #9ca3af; margin: 4px 0 14px; }
+    @media print {
+        .sidebar, .topbar, .page-actions, .no-print, .sidebar-backdrop { display: none !important; }
+        .main { margin-left: 0 !important; }
+        .content { padding: 0; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <h2>Order #{{ order.id }}</h2>
+        <p>Placed on {{ order.created_at|date:"d M Y, h:i A" }}
+            <span class="badge-s {% if order.status == 'Delivered' %}badge-ok{% elif order.status == 'Cancelled' %}badge-bad{% elif order.status == 'Shipped' %}badge-blue{% elif order.status == 'Processing' %}badge-info{% else %}badge-warn{% endif %} ms-2">{{ order.status }}</span>
+        </p>
+    </div>
+    <div class="page-actions">
+        <button type="button" class="btn-p-outline" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
+        <a href="{% url 'panel_orders' %}" class="btn-p-outline"><i class="bi bi-arrow-left"></i> Back to orders</a>
+    </div>
+</div>
+
+<div class="detail-grid">
+
+    <div>
+        <div class="data-card">
+            <div class="data-card-head"><h5>Items</h5></div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th class="num">Qty</th>
+                            <th class="num">Price</th>
+                            <th class="num">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items.all %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" alt="" class="thumb">
+                                    {% else %}
+                                    <span class="thumb thumb-ph"><i class="bi bi-image"></i></span>
+                                    {% endif %}
+                                    <a class="cell-title" href="{{ item.product.get_absolute_url }}" target="_blank" rel="noopener">{{ item.product.name }}</a>
+                                </div>
+                            </td>
+                            <td class="num">{{ item.quantity }}</td>
+                            <td class="num">₹{{ item.price|floatformat:2 }}</td>
+                            <td class="num">₹{{ item.total_price|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="totals">
+                        <tr>
+                            <td colspan="3" class="num">Subtotal</td>
+                            <td class="num">₹{{ order.subtotal|floatformat:2 }}</td>
+                        </tr>
+                        {% if order.discount_amount > 0 %}
+                        <tr>
+                            <td colspan="3" class="num">Coupon discount{% if order.coupon_code %} ({{ order.coupon_code }}){% endif %}</td>
+                            <td class="num">-₹{{ order.discount_amount|floatformat:2 }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td colspan="3" class="num">Delivery</td>
+                            <td class="num">FREE</td>
+                        </tr>
+                        <tr class="grand">
+                            <td colspan="3" class="num"><strong>Total</strong></td>
+                            <td class="num"><strong>₹{{ order.total_amount|floatformat:2 }}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="data-card">
+            <div class="data-card-head"><h5>Tracking</h5></div>
+            <div class="data-card-body">
+                <ol class="steps">
+                    {% for step in timeline %}
+                    <li class="{% if step.done %}done{% endif %}{% if step.current %} current{% endif %}{% if forloop.last and step.label == 'Cancelled' %} bad{% endif %}">{{ step.label }}</li>
+                    {% endfor %}
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="data-card no-print">
+            <div class="data-card-head"><h5>Update order</h5></div>
+            <div class="data-card-body">
+                <form method="post" action="{% url 'panel_order_update' order.id %}">
+                    {% csrf_token %}
+                    <label class="form-label fw-semibold" for="id_status">Order status</label>
+                    <select name="status" id="id_status" class="form-select">
+                        {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label class="form-label fw-semibold mt-3" for="id_payment_status">Payment status</label>
+                    <select name="payment_status" id="id_payment_status" class="form-select">
+                        {% for value, label in payment_choices %}
+                        <option value="{{ value }}" {% if order.payment_status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <span class="help-text">Changing the status emails the customer. Cancelling puts the stock back.</span>
+
+                    <button type="submit" class="btn-p"><i class="bi bi-check2"></i> Update</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-card">
+            <div class="data-card-head"><h5>Customer</h5></div>
+            <div class="data-card-body">
+                <dl class="kv">
+                    <dt>Name</dt><dd>{{ order.full_name }}</dd>
+                    <dt>Phone</dt><dd><a href="tel:{{ order.phone }}">{{ order.phone }}</a></dd>
+                    <dt>Email</dt><dd>{% if order.user.email %}<a href="mailto:{{ order.user.email }}">{{ order.user.email }}</a>{% else %}—{% endif %}</dd>
+                    <dt>Username</dt><dd><a href="{% url 'panel_customer_detail' order.user.id %}">{{ order.user.username }}</a></dd>
+                    <dt>Orders</dt><dd>{{ customer_order_count }}</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="data-card">
+            <div class="data-card-head"><h5>Delivery address</h5></div>
+            <div class="data-card-body">{{ order.full_address|linebreaksbr }}</div>
+        </div>
+
+        <div class="data-card">
+            <div class="data-card-head"><h5>Payment</h5></div>
+            <div class="data-card-body">
+                <dl class="kv">
+                    <dt>Method</dt><dd>{{ order.get_payment_method_display }}</dd>
+                    <dt>Status</dt>
+                    <dd><span class="badge-s {% if order.payment_status == 'Paid' %}badge-ok{% elif order.payment_status == 'Failed' %}badge-bad{% else %}badge-warn{% endif %}">{{ order.payment_status }}</span></dd>
+                    {% if order.razorpay_order_id %}
+                    <dt>Razorpay order</dt><dd class="mono">{{ order.razorpay_order_id }}</dd>
+                    {% endif %}
+                    {% if order.razorpay_payment_id %}
+                    <dt>Razorpay payment</dt><dd class="mono">{{ order.razorpay_payment_id }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+
+        {% if order.admin_note %}
+        <div class="data-card">
+            <div class="data-card-head"><h5>Needs attention</h5></div>
+            <div class="data-card-body"><span class="badge-s badge-bad">Note</span> {{ order.admin_note }}</div>
+        </div>
+        {% endif %}
+
+        {% if return_requests %}
+        <div class="data-card">
+            <div class="data-card-head">
+                <h5>Return requests</h5>
+                <a href="{% url 'panel_returns' %}" class="btn-p-outline btn-p-sm no-print">Manage</a>
+            </div>
+            <div class="data-card-body">
+                {% for r in return_requests %}
+                <div class="{% if not forloop.last %}mb-3 pb-3 border-bottom{% endif %}">
+                    <span class="badge-s {% if r.status == 'Approved' or r.status == 'Refunded' %}badge-ok{% elif r.status == 'Rejected' %}badge-bad{% else %}badge-warn{% endif %}">{{ r.status }}</span>
+                    <span class="cell-sub d-inline ms-2">{{ r.created_at|date:"d M Y" }}</span>
+                    <div class="mt-2">{{ r.reason|linebreaksbr }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}Payouts{% endblock %}
+
+{% block head_extra %}
+<style>
+    .owed-line { background: #eef5fb; border: 1px solid #cfe0f0; color: #1f4e79; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-weight: 600; }
+    .pay-form { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 6px; }
+    .pay-form input { width: 150px; font-size: 13px; padding: 3px 8px; }
+    .ref-cell { min-width: 140px; max-width: 260px; white-space: normal; word-break: break-word; }
+    .act-cell { min-width: 340px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <h2>Payouts</h2>
+        <p class="text-muted">Pay the affiliate from your bank or UPI app first, then enter the reference here. Marking paid emails the affiliate.</p>
+    </div>
+</div>
+
+<div class="owed-line"><i class="bi bi-wallet2"></i> &#8377;{{ owed|floatformat:2 }} waiting to be paid</div>
+
+<div class="tabs">
+    <a href="{% url 'panel_payouts' %}" class="{% if not status %}active{% endif %}">All<span class="n">{{ total }}</span></a>
+    <a href="?status=Requested" class="{% if status == 'Requested' %}active{% endif %}">Requested<span class="n">{{ counts.Requested|default:0 }}</span></a>
+    <a href="?status=Paid" class="{% if status == 'Paid' %}active{% endif %}">Paid<span class="n">{{ counts.Paid|default:0 }}</span></a>
+    <a href="?status=Rejected" class="{% if status == 'Rejected' %}active{% endif %}">Rejected<span class="n">{{ counts.Rejected|default:0 }}</span></a>
+</div>
+
+<div class="data-card">
+    {% if page_obj.object_list %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Requested</th>
+                    <th>Affiliate</th>
+                    <th class="num">Amount</th>
+                    <th>Send to</th>
+                    <th>Status</th>
+                    <th>Reference / note</th>
+                    <th class="actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in page_obj %}
+                <tr>
+                    <td>#{{ p.id }}</td>
+                    <td class="text-nowrap">{{ p.requested_at|date:"d M Y" }}<span class="cell-sub">{{ p.requested_at|date:"H:i" }}</span></td>
+                    <td><a class="cell-title" href="{% url 'panel_affiliate_detail' p.affiliate.id %}">{{ p.affiliate.user.username }}</a></td>
+                    <td class="num">&#8377;{{ p.amount|floatformat:2 }}</td>
+                    <td>
+                        {{ p.method_summary|default:"—" }}
+                        <span class="cell-sub"><a href="{% url 'panel_affiliate_detail' p.affiliate.id %}">View details</a></span>
+                    </td>
+                    <td>
+                        <span class="badge-s {% if p.status == 'Requested' %}badge-warn{% elif p.status == 'Paid' %}badge-ok{% else %}badge-bad{% endif %}">{{ p.status }}</span>
+                        {% if p.paid_at %}<span class="cell-sub">{{ p.paid_at|date:"d M Y" }}</span>{% endif %}
+                    </td>
+                    <td class="ref-cell">
+                        {% if p.reference %}<strong>{{ p.reference }}</strong>{% endif %}
+                        {% if p.note %}<span class="cell-sub">{{ p.note }}</span>{% endif %}
+                        {% if not p.reference and not p.note %}—{% endif %}
+                    </td>
+                    <td class="actions act-cell">
+                        {% if p.status == 'Requested' %}
+                        <form method="post" action="{% url 'panel_payout_paid' p.id %}" class="pay-form"
+                              onsubmit="return confirm('Have you already sent the money?');">
+                            {% csrf_token %}
+                            <input type="text" name="reference" class="form-control" placeholder="UPI / bank reference" required maxlength="120">
+                            <input type="text" name="note" class="form-control" placeholder="Note (optional)" maxlength="255">
+                            <button type="submit" class="btn-p btn-p-sm">Mark paid</button>
+                        </form>
+                        <form method="post" action="{% url 'panel_payout_reject' p.id %}" class="pay-form"
+                              onsubmit="return confirm('Reject this payout? The money goes back to the affiliate balance.');">
+                            {% csrf_token %}
+                            <input type="text" name="note" class="form-control" placeholder="Reason (optional)" maxlength="255">
+                            <button type="submit" class="btn-p-danger btn-p-sm">Reject</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pager-p">
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} ({{ page_obj.paginator.count }} payouts)</span>
+        <div class="links">
+            {% if page_obj.has_previous %}
+                <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">&laquo; Prev</a>
+            {% else %}
+                <span class="pg disabled">&laquo; Prev</span>
+            {% endif %}
+            <span class="pg current">{{ page_obj.number }}</span>
+            {% if page_obj.has_next %}
+                <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Next &raquo;</a>
+            {% else %}
+                <span class="pg disabled">Next &raquo;</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-wallet2"></i>
+        <p class="mb-0">{% if status %}No {{ status|lower }} payouts.{% else %}No payout requests yet.{% endif %}</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }} | {{ site_name }}{% endblock %}
+{% block meta_description %}{{ meta_description }}{% endblock %}
+
+{% block content %}
+<article class="content-page">
+    <h1>{{ page_title }}</h1>
+    <p class="text-muted" style="font-size:13px;">Last updated: {% now "F Y" %}</p>
+    {% include content_template %}
+</article>
+{% endblock %}

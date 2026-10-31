@@ -1,0 +1,95 @@
+{% extends 'panel/base.html' %}
+
+{% block head_extra %}
+<style>
+    .reason-cell { min-width: 220px; max-width: 380px; white-space: normal; word-break: break-word; }
+    .status-form { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; }
+    .status-form select { width: auto; font-size: 13px; padding: 3px 28px 3px 8px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <h2>Return requests</h2>
+        <p class="text-muted">Refunds are not sent automatically. Refund the customer in your Razorpay dashboard or by cash/bank transfer, then mark it Refunded.</p>
+    </div>
+</div>
+
+<div class="tabs">
+    <a href="{% url 'panel_returns' %}" class="{% if not status %}active{% endif %}">All<span class="n">{{ total }}</span></a>
+    <a href="?status=Requested" class="{% if status == 'Requested' %}active{% endif %}">Requested<span class="n">{{ counts.Requested|default:0 }}</span></a>
+    <a href="?status=Approved" class="{% if status == 'Approved' %}active{% endif %}">Approved<span class="n">{{ counts.Approved|default:0 }}</span></a>
+    <a href="?status=Rejected" class="{% if status == 'Rejected' %}active{% endif %}">Rejected<span class="n">{{ counts.Rejected|default:0 }}</span></a>
+    <a href="?status=Refunded" class="{% if status == 'Refunded' %}active{% endif %}">Refunded<span class="n">{{ counts.Refunded|default:0 }}</span></a>
+</div>
+
+<div class="data-card">
+    {% if page_obj.object_list %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Requested</th>
+                    <th>Order</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in page_obj %}
+                <tr>
+                    <td class="text-nowrap">{{ r.created_at|date:"d M Y" }}<span class="cell-sub">{{ r.created_at|date:"H:i" }}</span></td>
+                    <td>
+                        <a class="cell-title" href="{% url 'panel_order_detail' r.order.id %}">#{{ r.order.id }}</a>
+                        <span class="cell-sub">{{ r.order.full_name }} &middot; &#8377;{{ r.order.total_amount }}</span>
+                    </td>
+                    <td class="reason-cell">{{ r.reason|linebreaksbr }}</td>
+                    <td>
+                        <span class="badge-s {% if r.status == 'Requested' %}badge-warn{% elif r.status == 'Approved' %}badge-info{% elif r.status == 'Rejected' %}badge-bad{% else %}badge-ok{% endif %}">{{ r.status }}</span>
+                        <br>
+                        <form method="post" action="{% url 'panel_return_update' r.id %}" class="status-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <select name="status" class="form-select form-select-sm" aria-label="Change status">
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if value == r.status %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn-p-outline btn-p-sm">Update</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pager-p">
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} ({{ page_obj.paginator.count }} requests)</span>
+        <div class="links">
+            {% if page_obj.has_previous %}
+                <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">&laquo; Prev</a>
+            {% else %}
+                <span class="pg disabled">&laquo; Prev</span>
+            {% endif %}
+            <span class="pg current">{{ page_obj.number }}</span>
+            {% if page_obj.has_next %}
+                <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Next &raquo;</a>
+            {% else %}
+                <span class="pg disabled">Next &raquo;</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-arrow-return-left"></i>
+        <p class="mb-0">{% if status %}No {{ status|lower }} return requests.{% else %}No return requests yet.{% endif %}</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

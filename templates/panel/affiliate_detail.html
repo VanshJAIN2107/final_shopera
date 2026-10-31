@@ -1,0 +1,231 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}{{ affiliate.user.username }}{% endblock %}
+
+{% block head_extra %}
+<style>
+    .code-cell { font-family: SFMono-Regular, Consolas, Menlo, monospace; font-size: 13px; }
+    .facts { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 0 0 18px; font-size: 14px; color: #6b7280; }
+    .facts strong { color: #1f2937; }
+    .path-cell { max-width: 320px; word-break: break-all; white-space: normal; }
+    .help-text { font-size: 12px; color: #6b7280; margin-top: 6px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <h2>{{ affiliate.user.username }}
+            <span class="badge-s {% if affiliate.status == 'Pending' %}badge-warn{% elif affiliate.status == 'Approved' %}badge-ok{% else %}badge-bad{% endif %} fs-6 ms-2">{{ affiliate.status }}</span>
+        </h2>
+        <p>Code <span class="code-cell">{{ affiliate.code }}</span> &middot; {{ affiliate.commission_percent|floatformat:"-2" }}% commission</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'panel_affiliates' %}" class="btn-p-outline"><i class="bi bi-arrow-left"></i> Back to affiliates</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="bi bi-graph-up"></i></div>
+            <h3>&#8377;{{ affiliate.lifetime_earnings|floatformat:2 }}</h3>
+            <p>Earned in total</p>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="bi bi-wallet2"></i></div>
+            <h3>&#8377;{{ affiliate.available_balance|floatformat:2 }}</h3>
+            <p>Available</p>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon orange"><i class="bi bi-hourglass-split"></i></div>
+            <h3>&#8377;{{ affiliate.requested_amount|floatformat:2 }}</h3>
+            <p>In payout requests</p>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon purple"><i class="bi bi-check2-circle"></i></div>
+            <h3>&#8377;{{ affiliate.paid_amount|floatformat:2 }}</h3>
+            <p>Paid out</p>
+        </div>
+    </div>
+</div>
+
+<div class="facts">
+    <span>Clicks: <strong>{{ clicks_total }}</strong></span>
+    <span>Orders: <strong>{{ orders_total }}</strong></span>
+    <span>Waiting for delivery: <strong>&#8377;{{ affiliate.pending_amount|floatformat:2 }}</strong></span>
+</div>
+
+<div class="detail-grid">
+
+    <div>
+        <div class="data-card">
+            <div class="data-card-head"><h5>Commissions</h5></div>
+            {% if commissions %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Date</th>
+                            <th class="num">Order amount</th>
+                            <th class="num">Rate</th>
+                            <th class="num">Commission</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in commissions %}
+                        <tr>
+                            <td><a class="cell-title" href="{% url 'panel_order_detail' c.order.id %}">#{{ c.order.id }}</a></td>
+                            <td class="text-nowrap">{{ c.created_at|date:"d M Y" }}</td>
+                            <td class="num">&#8377;{{ c.order_amount|floatformat:2 }}</td>
+                            <td class="num">{{ c.rate|floatformat:"-2" }}%</td>
+                            <td class="num">&#8377;{{ c.amount|floatformat:2 }}</td>
+                            <td>
+                                <span class="badge-s {% if c.status == 'Pending' %}badge-warn{% elif c.status == 'Approved' %}badge-info{% elif c.status == 'Paid' %}badge-ok{% else %}badge-bad{% endif %}">{{ c.status }}</span>
+                                {% if c.note %}<span class="cell-sub">{{ c.note }}</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state"><i class="bi bi-cash-coin"></i><p class="mb-0">No commissions yet.</p></div>
+            {% endif %}
+        </div>
+
+        <div class="data-card">
+            <div class="data-card-head"><h5>Payouts</h5></div>
+            {% if payouts %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Requested</th>
+                            <th class="num">Amount</th>
+                            <th>Sent to</th>
+                            <th>Status</th>
+                            <th>Reference</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in payouts %}
+                        <tr>
+                            <td>#{{ p.id }}</td>
+                            <td class="text-nowrap">{{ p.requested_at|date:"d M Y" }}</td>
+                            <td class="num">&#8377;{{ p.amount|floatformat:2 }}</td>
+                            <td>{{ p.method_summary|default:"—" }}</td>
+                            <td><span class="badge-s {% if p.status == 'Requested' %}badge-warn{% elif p.status == 'Paid' %}badge-ok{% else %}badge-bad{% endif %}">{{ p.status }}</span></td>
+                            <td>{{ p.reference|default:"—" }}{% if p.note %}<span class="cell-sub">{{ p.note }}</span>{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state"><i class="bi bi-wallet2"></i><p class="mb-0">No payout requests yet.</p></div>
+            {% endif %}
+        </div>
+
+        <div class="data-card">
+            <div class="data-card-head"><h5>Recent clicks</h5></div>
+            {% if recent_clicks %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Landing page</th>
+                            <th>Referrer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for k in recent_clicks %}
+                        <tr>
+                            <td class="text-nowrap">{{ k.created_at|date:"d M Y, H:i" }}</td>
+                            <td class="path-cell">{{ k.landing_path|default:"/" }}</td>
+                            <td class="path-cell">{{ k.referer|default:"direct" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state"><i class="bi bi-cursor"></i><p class="mb-0">No clicks recorded yet.</p></div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div>
+        <div class="data-card">
+            <div class="data-card-head"><h5>Settings</h5></div>
+            <div class="data-card-body">
+                <form method="post" action="{% url 'panel_affiliate_update' affiliate.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="f-status" class="form-label">Status</label>
+                        <select id="f-status" name="status" class="form-select">
+                            {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if value == affiliate.status %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="f-pct" class="form-label">Commission (%)</label>
+                        <input type="number" id="f-pct" name="commission_percent" class="form-control" step="0.01" min="0" max="100" value="{{ affiliate.commission_percent|floatformat:'2u' }}" required>
+                        <div class="help-text">The new rate applies to future orders only. Approving emails the affiliate.</div>
+                    </div>
+                    <button type="submit" class="btn-p mt-2">Save</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-card">
+            <div class="data-card-head"><h5>Profile</h5></div>
+            <div class="data-card-body">
+                <dl class="kv">
+                    <dt>User</dt><dd><a href="{% url 'panel_customer_detail' affiliate.user.id %}">{{ affiliate.user.username }}</a></dd>
+                    <dt>Email</dt><dd>{% if affiliate.user.email %}<a href="mailto:{{ affiliate.user.email }}">{{ affiliate.user.email }}</a>{% else %}—{% endif %}</dd>
+                    <dt>Joined</dt><dd>{{ affiliate.created_at|date:"d M Y, h:i A" }}</dd>
+                    <dt>Approved</dt><dd>{% if affiliate.approved_at %}{{ affiliate.approved_at|date:"d M Y, h:i A" }}{% else %}—{% endif %}</dd>
+                    <dt>How they will promote</dt><dd>{% if affiliate.promo_description %}{{ affiliate.promo_description|linebreaksbr }}{% else %}—{% endif %}</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="data-card">
+            <div class="data-card-head"><h5>Payout details</h5></div>
+            <div class="data-card-body">
+                {% if affiliate.payout_method == 'UPI' %}
+                <dl class="kv">
+                    <dt>Method</dt><dd>UPI</dd>
+                    <dt>UPI ID</dt><dd>{{ affiliate.upi_id|default:"—" }}</dd>
+                </dl>
+                {% elif affiliate.payout_method == 'BANK' %}
+                <dl class="kv">
+                    <dt>Method</dt><dd>Bank transfer</dd>
+                    <dt>Account holder</dt><dd>{{ affiliate.account_holder|default:"—" }}</dd>
+                    <dt>Bank</dt><dd>{{ affiliate.bank_name|default:"—" }}</dd>
+                    <dt>Account number</dt><dd>{{ affiliate.account_number|default:"—" }}</dd>
+                    <dt>IFSC</dt><dd>{{ affiliate.ifsc|default:"—" }}</dd>
+                </dl>
+                {% else %}
+                <p class="mb-0 text-muted">Not added yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Join the Affiliate Program | {{ site_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+
+    .af-join-wrap { max-width: 620px; margin: 0 auto; padding: 40px 16px 0; }
+
+    .af-join-card { padding: 34px 30px; }
+
+    .af-join-card h1 { font-size: clamp(24px, 4vw, 32px); font-weight: 800; margin: 0 0 8px; }
+    .af-join-card .af-sub { color: var(--muted); margin: 0 0 20px; }
+
+    .af-terms {
+        margin: 0 0 24px;
+        padding: 16px 18px 16px 36px;
+        border-radius: 14px;
+        background: var(--bg-alt);
+        color: #4d443d;
+        font-size: 14.5px;
+        line-height: 1.7;
+    }
+
+    .af-terms li { margin-bottom: 4px; }
+
+    .af-err { margin-top: 6px; color: var(--danger); font-size: 13.5px; font-weight: 600; }
+
+    .af-join-card .form-check-label { font-size: 14.5px; }
+
+    @media (max-width: 520px) {
+        .af-join-card { padding: 26px 18px; }
+    }
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="af-join-wrap">
+
+    <div class="surface af-join-card">
+
+        <h1>Join the {{ site_name }} affiliate program</h1>
+        <p class="af-sub">Free to join. Share your link and earn on every order it brings in.</p>
+
+        <ul class="af-terms">
+            <li><strong>{{ rate|floatformat:"-2" }}% commission</strong> on the order total after discounts</li>
+            <li>{{ cookie_days }}-day tracking: the last link clicked gets the credit</li>
+            <li>Commission is approved when the order is delivered</li>
+            <li>Payouts to UPI or bank, from &#8377;{{ min_payout }}</li>
+        </ul>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="id_promo_description" class="form-label">How will you promote {{ site_name }}? <span class="text-muted fw-normal">(optional)</span></label>
+                <textarea
+                    name="promo_description"
+                    id="id_promo_description"
+                    class="form-control"
+                    rows="3"
+                    maxlength="600"
+                    placeholder="Instagram page, YouTube channel, blog, WhatsApp groups..."
+                >{{ form.promo_description.value|default_if_none:'' }}</textarea>
+                {% for e in form.promo_description.errors %}<div class="af-err">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="agree" id="id_agree"{% if form.agree.value %} checked{% endif %}>
+                    <label class="form-check-label" for="id_agree">
+                        I agree to the <a href="{% url 'affiliate_landing' %}#rules" target="_blank" rel="noopener">affiliate terms</a>
+                    </label>
+                </div>
+                {% for e in form.agree.errors %}<div class="af-err">{{ e }}</div>{% endfor %}
+            </div>
+
+            <button type="submit" class="btn-theme w-100">Apply now</button>
+        </form>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}{{ customer.get_full_name|default:customer.username }}{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <h2>{{ customer.get_full_name|default:customer.username }}
+            {% if customer.is_active %}<span class="badge-s badge-ok fs-6 ms-2">Active</span>{% else %}<span class="badge-s badge-bad fs-6 ms-2">Blocked</span>{% endif %}
+        </h2>
+        <p>@{{ customer.username }} &middot; Joined {{ customer.date_joined|date:"d M Y" }}</p>
+    </div>
+    <div class="page-actions">
+        {% if customer.email %}
+        <a href="mailto:{{ customer.email }}" class="btn-p-outline"><i class="bi bi-envelope"></i> Email</a>
+        {% endif %}
+        {% if not customer.is_staff %}
+        <form method="post" action="{% url 'panel_customer_toggle' customer.id %}"
+              onsubmit="return confirm('{% if customer.is_active %}Block{% else %}Unblock{% endif %} this customer?');">
+            {% csrf_token %}
+            {% if customer.is_active %}
+            <button type="submit" class="btn-p-danger"><i class="bi bi-slash-circle"></i> Block customer</button>
+            {% else %}
+            <button type="submit" class="btn-p"><i class="bi bi-check-circle"></i> Unblock customer</button>
+            {% endif %}
+        </form>
+        {% endif %}
+        <a href="{% url 'panel_customers' %}" class="btn-p-outline"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="bi bi-bag"></i></div>
+            <h3>{{ order_count }}</h3>
+            <p>Orders</p>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="bi bi-currency-rupee"></i></div>
+            <h3>₹{{ total_spent|floatformat:2 }}</h3>
+            <p>Total spent</p>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon purple"><i class="bi bi-heart"></i></div>
+            <h3>{{ wishlist_count }}</h3>
+            <p>Wishlist items</p>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon orange"><i class="bi bi-star"></i></div>
+            <h3>{{ reviews|length }}</h3>
+            <p>Reviews</p>
+        </div>
+    </div>
+</div>
+
+<div class="detail-grid">
+
+    <div>
+        <div class="data-card">
+            <div class="data-card-head"><h5>Orders</h5></div>
+            {% if orders %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Date</th>
+                            <th class="num">Items</th>
+                            <th class="num">Total</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for o in orders %}
+                        <tr>
+                            <td><a class="cell-title" href="{% url 'panel_order_detail' o.id %}">#{{ o.id }}</a></td>
+                            <td>{{ o.created_at|date:"d M Y" }}</td>
+                            <td class="num">{{ o.item_count }}</td>
+                            <td class="num">₹{{ o.total_amount|floatformat:2 }}</td>
+                            <td><span class="badge-s {% if o.payment_status == 'Paid' %}badge-ok{% elif o.payment_status == 'Failed' %}badge-bad{% else %}badge-warn{% endif %}">{{ o.payment_status }}</span></td>
+                            <td><span class="badge-s {% if o.status == 'Delivered' %}badge-ok{% elif o.status == 'Cancelled' %}badge-bad{% elif o.status == 'Shipped' %}badge-blue{% elif o.status == 'Processing' %}badge-info{% else %}badge-warn{% endif %}">{{ o.status }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-bag"></i>
+                <p class="mb-0">This customer has not placed any orders yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div>
+        <div class="data-card">
+            <div class="data-card-head"><h5>Profile</h5></div>
+            <div class="data-card-body">
+                <dl class="kv">
+                    <dt>Username</dt><dd>{{ customer.username }}</dd>
+                    <dt>Email</dt><dd>{% if customer.email %}<a href="mailto:{{ customer.email }}">{{ customer.email }}</a>{% else %}—{% endif %}</dd>
+                    <dt>Joined</dt><dd>{{ customer.date_joined|date:"d M Y, h:i A" }}</dd>
+                    <dt>Last login</dt><dd>{% if customer.last_login %}{{ customer.last_login|date:"d M Y, h:i A" }}{% else %}Never{% endif %}</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="data-card">
+            <div class="data-card-head"><h5>Addresses</h5></div>
+            <div class="data-card-body">
+                {% for a in addresses %}
+                <div class="{% if not forloop.last %}mb-3 pb-3 border-bottom{% endif %}">
+                    {{ a.full_address }}
+                    {% if a.is_default %}<span class="badge-s badge-info ms-1">Default</span>{% endif %}
+                    <span class="cell-sub">{{ a.full_name }} &middot; {{ a.phone }}</span>
+                </div>
+                {% empty %}
+                <span class="text-muted">No saved addresses.</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="data-card">
+            <div class="data-card-head"><h5>Reviews</h5></div>
+            <div class="data-card-body">
+                {% for r in reviews %}
+                <div class="{% if not forloop.last %}mb-3 pb-3 border-bottom{% endif %}">
+                    <a class="cell-title" href="{{ r.product.get_absolute_url }}" target="_blank" rel="noopener">{{ r.product.name }}</a>
+                    <span class="badge-s badge-warn ms-1">{{ r.rating }}/5</span>
+                    {% if r.comment %}<span class="cell-sub">{{ r.comment|truncatechars:90 }}</span>{% endif %}
+                </div>
+                {% empty %}
+                <span class="text-muted">No reviews yet.</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

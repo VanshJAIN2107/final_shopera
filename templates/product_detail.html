@@ -1,0 +1,839 @@
+{% load l10n %}<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ product.name }} | {{ site_name }}</title>
+
+    <meta name="description" content="{{ product.description|truncatechars:155 }}">
+    <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+
+    <meta property="og:title" content="{{ product.name }} | {{ site_name }}">
+    <meta property="og:description" content="{{ product.description|truncatechars:155 }}">
+    <meta property="og:type" content="product">
+    <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+    {% if product.image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ product.image.url }}">{% endif %}
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": "{{ product.name|escapejs }}",
+        "description": "{{ product.description|truncatechars:500|escapejs }}",
+        {% if product.image %}"image": "{{ request.scheme }}://{{ request.get_host }}{{ product.image.url|escapejs }}",{% endif %}
+        "sku": "{{ product.id }}",
+        {% if product.review_count > 0 %}"aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "{{ product.avg_rating|unlocalize|floatformat:1 }}",
+            "reviewCount": "{{ product.review_count }}"
+        },{% endif %}
+        "offers": {
+            "@type": "Offer",
+            "priceCurrency": "INR",
+            "price": "{{ product.price|unlocalize }}",
+            "availability": "https://schema.org/{% if product.stock > 0 %}InStock{% else %}OutOfStock{% endif %}",
+            "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}"
+        }
+    }
+    </script>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        .pd-section { margin-top: 28px; margin-bottom: 48px; }
+
+        .pd-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 24px;
+        }
+
+        @media (min-width: 992px) {
+            .pd-grid { grid-template-columns: minmax(0, 40fr) minmax(0, 35fr) minmax(0, 25fr); }
+            .pd-buybox { position: sticky; top: calc(var(--header-h) + 24px); }
+        }
+
+        .pd-image-card {
+            min-height: 320px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        @media (min-width: 992px) {
+            .pd-image-card { min-height: 520px; }
+            .pd-gallery { position: sticky; top: calc(var(--header-h) + 24px); }
+        }
+
+        .pd-image { width: 100%; max-height: 520px; object-fit: contain; }
+
+        .pd-thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+
+        .pd-thumb {
+            width: 64px;
+            height: 64px;
+            padding: 3px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .pd-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; display: block; }
+        .pd-thumb:hover { border-color: var(--border-strong); }
+        .pd-thumb.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+
+        .pd-no-image {
+            width: 100%;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-alt);
+            border: 1px dashed var(--border-strong);
+            border-radius: var(--radius);
+            color: var(--muted);
+        }
+
+        .pd-crumbs { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+        .pd-crumbs a { color: var(--muted); text-decoration: none; }
+        .pd-crumbs a:hover { color: var(--accent); text-decoration: underline; }
+        .pd-crumbs .sep { margin: 0 6px; }
+
+        .pd-title {
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 26px;
+            font-weight: 600;
+            line-height: 1.3;
+            margin: 0 0 8px;
+            overflow-wrap: anywhere;
+        }
+
+        .pd-rating { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+        .pd-rating a { color: var(--accent); text-decoration: none; }
+        .pd-rating a:hover { text-decoration: underline; }
+
+        .pd-divider { border: 0; border-top: 1px solid var(--border); opacity: 1; margin: 16px 0; }
+
+        .pd-price { font-size: 20px; }
+
+        .pd-price-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+
+        .pd-save { color: var(--success); font-size: 13px; font-weight: 600; }
+
+        .pd-about h2 {
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 8px;
+        }
+
+        .pd-desc { white-space: pre-line; color: var(--text); line-height: 1.65; font-size: 15px; overflow-wrap: anywhere; }
+
+        .pd-buybox { padding: 20px; }
+
+        .pd-stock-in { color: var(--success); font-size: 18px; font-weight: 600; }
+        .pd-stock-out { color: var(--danger); font-size: 18px; font-weight: 600; }
+
+        .pd-buybox .btn-cart,
+        .pd-buybox .btn-buy { width: 100%; }
+
+        .pd-wish {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--border-strong);
+            border-radius: 999px;
+            color: var(--text);
+            padding: 8px 14px;
+            font-size: 14px;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+        .pd-wish:hover { border-color: var(--accent); color: var(--accent); }
+
+        .pd-qty { max-width: 100px; }
+
+        .pd-notify { padding: 12px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius); }
+        .pd-notify .btn-theme-outline { width: 100%; padding: 8px 14px; font-size: 14px; }
+
+        .pd-trust { font-size: 12.5px; color: var(--muted); }
+        .pd-trust div { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; }
+        .pd-trust span:last-child { color: var(--text); }
+
+        /* ---------- reviews ---------- */
+
+        .rv-section { margin-top: 48px; scroll-margin-top: calc(var(--header-h) + 24px); }
+
+        .rv-heading, .rel-heading {
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0 0 16px;
+        }
+
+        .rv-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+
+        @media (min-width: 992px) {
+            .rv-layout { grid-template-columns: minmax(0, 32fr) minmax(0, 68fr); align-items: start; }
+            .rv-summary { position: sticky; top: calc(var(--header-h) + 24px); }
+        }
+
+        .rv-summary { padding: 22px; }
+
+        .rv-big { display: flex; align-items: baseline; gap: 8px; }
+        .rv-big strong { font-size: 44px; font-weight: 700; line-height: 1; }
+        .rv-big span { color: var(--muted); font-size: 14px; }
+
+        .rv-bar-row { display: flex; align-items: center; gap: 10px; font-size: 13px; margin-top: 8px; }
+        .rv-bar-row .lbl { width: 42px; flex-shrink: 0; color: var(--accent); }
+        .rv-bar-row .cnt { width: 32px; flex-shrink: 0; text-align: right; color: var(--muted); }
+        .rv-bar { flex: 1; height: 12px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+        .rv-bar > i { display: block; height: 100%; background: #d9902b; }
+        /* bar fill in 5% steps (class b0..b20) */
+        .rv-bar > i.b0 { width: 0%; }
+        .rv-bar > i.b1 { width: 5%; }
+        .rv-bar > i.b2 { width: 10%; }
+        .rv-bar > i.b3 { width: 15%; }
+        .rv-bar > i.b4 { width: 20%; }
+        .rv-bar > i.b5 { width: 25%; }
+        .rv-bar > i.b6 { width: 30%; }
+        .rv-bar > i.b7 { width: 35%; }
+        .rv-bar > i.b8 { width: 40%; }
+        .rv-bar > i.b9 { width: 45%; }
+        .rv-bar > i.b10 { width: 50%; }
+        .rv-bar > i.b11 { width: 55%; }
+        .rv-bar > i.b12 { width: 60%; }
+        .rv-bar > i.b13 { width: 65%; }
+        .rv-bar > i.b14 { width: 70%; }
+        .rv-bar > i.b15 { width: 75%; }
+        .rv-bar > i.b16 { width: 80%; }
+        .rv-bar > i.b17 { width: 85%; }
+        .rv-bar > i.b18 { width: 90%; }
+        .rv-bar > i.b19 { width: 95%; }
+        .rv-bar > i.b20 { width: 100%; }
+
+        .rv-form-card { padding: 22px; }
+        .rv-form-card h3 { font-family: 'Inter', system-ui, sans-serif; font-size: 18px; font-weight: 600; margin: 0 0 12px; }
+
+        .star-pick { display: inline-flex; flex-direction: row-reverse; justify-content: flex-end; }
+        .star-pick input {
+            position: absolute;
+            opacity: 0;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+        .star-pick label {
+            font-size: 30px;
+            line-height: 1;
+            padding: 0 3px;
+            color: #dcd2c2;
+            cursor: pointer;
+            transition: color .12s;
+        }
+        .star-pick label:hover,
+        .star-pick label:hover ~ label,
+        .star-pick input:checked ~ label { color: #d9902b; }
+        .star-pick input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+        .rv-list { margin-top: 24px; }
+
+        .rv-item { padding: 18px 0; border-top: 1px solid var(--border); }
+        .rv-item:first-child { border-top: 0; }
+
+        .rv-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+
+        .rv-avatar {
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: var(--accent-soft);
+            border: 1px solid var(--border-strong);
+            color: var(--primary);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rv-user { font-weight: 600; font-size: 14px; }
+        .rv-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+        .rv-date { color: var(--muted); font-size: 12.5px; }
+        .rv-title { font-weight: 700; margin-bottom: 4px; overflow-wrap: anywhere; }
+        .rv-text { color: var(--text); line-height: 1.6; font-size: 14.5px; overflow-wrap: anywhere; }
+
+        .rv-empty { padding: 24px 0 4px; color: var(--muted); }
+
+        /* related */
+
+        .rel-section { margin-top: 48px; }
+
+        .rel-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+
+        @media (min-width: 576px) { .rel-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media (min-width: 992px) { .rel-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+
+        .rel-card {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            color: var(--text);
+            text-decoration: none;
+            transition: box-shadow .2s, transform .2s;
+        }
+        .rel-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); color: var(--text); }
+
+        .rel-img {
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            background: var(--bg-alt);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .rel-name {
+            font-size: 13.5px;
+            font-weight: 500;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 2.7em;
+        }
+
+        /* two-column editorial layout: gallery left, details + purchase panel right */
+
+        @media (min-width: 992px) {
+            .pd-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 56px; row-gap: 0; align-items: start; }
+            .pd-grid > :nth-child(1) { grid-column: 1; grid-row: 1 / span 2; }
+            .pd-grid > :nth-child(2) { grid-column: 2; grid-row: 1; }
+            .pd-grid > :nth-child(3) { grid-column: 2; grid-row: 2; }
+            .pd-buybox { position: static; }
+        }
+
+        .pd-image-card {
+            min-height: 0;
+            aspect-ratio: 1 / 1;
+            padding: 26px;
+            background: var(--bg-alt);
+            border: 0;
+            border-radius: 26px;
+            box-shadow: none;
+        }
+
+        .pd-image { height: 100%; max-height: none; object-fit: contain; mix-blend-mode: multiply; }
+
+        .pd-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(28px, 3.2vw, 40px);
+            font-weight: 800;
+            line-height: 1.15;
+        }
+
+        .pd-price { font-size: 26px; }
+
+        /* the price is already shown above, so the purchase panel starts with the stock line */
+        .pd-buybox > .pd-price-row { display: none; }
+
+        .pd-buybox {
+            margin-top: 22px;
+            padding: 24px;
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: none;
+        }
+
+        .pd-buybox .btn-cart { padding: 14px 20px; font-size: 15px; }
+        .pd-buybox .btn-buy  { padding: 14px 20px; font-size: 15px; }
+    </style>
+
+{% include 'partials/theme.html' %}
+</head>
+
+<body>
+
+<!-- Navbar -->
+
+{% include 'partials/navbar.html' with active='products' %}
+
+
+<!-- Product -->
+
+<div class="container pd-section">
+
+    <div class="pd-grid">
+
+
+        <!-- Left: Image gallery -->
+
+        <div class="pd-gallery">
+            <div class="pd-image-card">
+
+                {% if images %}
+
+                    <img
+                        src="{{ images.0 }}"
+                        alt="{{ product.name }}"
+                        class="pd-image"
+                        id="pd-main-image"
+                    >
+
+                {% else %}
+
+                    <div class="pd-no-image">
+                        No Image Available
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+            {% if images|length > 1 %}
+                <div class="pd-thumbs" id="pd-thumbs">
+                    {% for url in images %}
+                        <button
+                            type="button"
+                            class="pd-thumb{% if forloop.first %} active{% endif %}"
+                            data-src="{{ url }}"
+                            aria-label="Show image {{ forloop.counter }}"
+                        >
+                            <img src="{{ url }}" alt="">
+                        </button>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+
+        <!-- Middle: Details -->
+
+        <div>
+
+            <nav class="pd-crumbs" aria-label="Breadcrumb">
+                <a href="{% url 'home' %}">Home</a>
+                <span class="sep">&rsaquo;</span>
+                <a href="{% url 'products' %}">Shop</a>
+                {% if product.category %}
+                    <span class="sep">&rsaquo;</span>
+                    <span>{{ product.category.name }}</span>
+                {% endif %}
+            </nav>
+
+            <h1 class="pd-title">{{ product.name }}</h1>
+
+            <div class="pd-rating">
+                {% if product.review_count > 0 %}
+                    <span class="rating">
+                        <strong>{{ product.avg_rating|floatformat:1 }}</strong>
+                        <span class="stars" aria-hidden="true"><span class="f{% widthratio product.avg_rating 5 10 %}"></span></span>
+                    </span>
+                    <a href="#reviews">{{ product.review_count }} rating{{ product.review_count|pluralize }}</a>
+                {% else %}
+                    <span class="text-muted">No reviews yet</span>
+                {% endif %}
+            </div>
+
+            <hr class="pd-divider">
+
+            <div class="pd-price-block">
+                <div class="pd-price-row">
+                    {% if product.discount_percent > 0 %}
+                        <span class="badge-discount">-{{ product.discount_percent }}%</span>
+                    {% endif %}
+                    <span class="az-price pd-price"><span class="sym">₹</span><span class="amt">{{ product.price }}</span></span>
+                </div>
+                {% if product.discount_percent > 0 %}
+                    <div class="az-meta mt-2">
+                        M.R.P.: <span class="az-mrp" style="margin-left:0">₹{{ product.mrp }}</span>
+                        &middot; <span class="pd-save">You save ₹{{ product.savings|floatformat:0 }}</span>
+                    </div>
+                {% endif %}
+                <div class="az-meta mt-1">Inclusive of all taxes</div>
+                <div class="az-meta mt-1"><strong>Free delivery</strong></div>
+            </div>
+
+            <hr class="pd-divider">
+
+            <div class="pd-about">
+                <h2>About this item</h2>
+                <div class="pd-desc">{{ product.description }}</div>
+            </div>
+
+        </div>
+
+
+        <!-- Right: Buy box -->
+
+        <div>
+            <div class="pd-buybox surface">
+
+                <div class="pd-price-row">
+                    {% if product.discount_percent > 0 %}
+                        <span class="badge-discount">-{{ product.discount_percent }}%</span>
+                    {% endif %}
+                    <span class="az-price pd-price"><span class="sym">₹</span><span class="amt">{{ product.price }}</span></span>
+                </div>
+
+                {% if product.discount_percent > 0 %}
+                    <div class="az-meta mt-1">
+                        M.R.P.: <span class="az-mrp" style="margin-left:0">₹{{ product.mrp }}</span>
+                    </div>
+                    <div class="pd-save mt-1">You save ₹{{ product.savings|floatformat:0 }}</div>
+                {% endif %}
+
+                <div class="az-meta mt-2"><strong>Free delivery</strong></div>
+
+                <!-- Stock -->
+
+                {% if product.stock > 0 %}
+
+                    <div class="pd-stock-in mt-3">In stock</div>
+
+                    <form
+                        method="POST"
+                        action="{% url 'add_to_cart' product.id %}"
+                        class="mt-3"
+                    >
+
+                        {% csrf_token %}
+
+                        <div class="mb-3 d-flex align-items-center gap-2">
+
+                            <label
+                                for="quantity"
+                                class="form-label fw-semibold mb-0"
+                            >
+                                Quantity
+                            </label>
+
+                            <input
+                                type="number"
+                                name="quantity"
+                                id="quantity"
+                                class="form-control form-control-sm pd-qty"
+                                value="1"
+                                min="1"
+                                max="{{ product.stock }}"
+                            >
+
+                        </div>
+
+                        <button type="submit" class="btn-cart">
+                            Add to Cart
+                        </button>
+
+                    </form>
+
+                {% else %}
+
+                    <div class="pd-stock-out mt-3">Currently unavailable</div>
+
+                    <button type="button" class="btn-cart mt-3" disabled>
+                        Add to Cart
+                    </button>
+
+                    <form method="POST" action="{% url 'notify_me' product.id %}" class="pd-notify mt-3">
+                        {% csrf_token %}
+                        <label for="notify-email" class="form-label mb-1">Notify me when available</label>
+                        <input
+                            type="email"
+                            name="email"
+                            id="notify-email"
+                            class="form-control form-control-sm mb-2"
+                            value="{{ user_email }}"
+                            placeholder="you@example.com"
+                            required
+                        >
+                        <button type="submit" class="btn-theme-outline">Notify me when available</button>
+                    </form>
+
+                {% endif %}
+
+
+                <!-- WISHLIST -->
+
+                <div class="mt-3">
+
+                    {% if user.is_authenticated %}
+
+                        {% if in_wishlist %}
+                            <form
+                                method="POST"
+                                action="{% url 'remove_from_wishlist' product.id %}"
+                            >
+                                {% csrf_token %}
+                                <button type="submit" class="pd-wish">
+                                    Remove from Wishlist
+                                </button>
+                            </form>
+                        {% else %}
+                            <form
+                                method="POST"
+                                action="{% url 'add_to_wishlist' product.id %}"
+                            >
+                                {% csrf_token %}
+                                <button type="submit" class="pd-wish">
+                                    Add to Wishlist
+                                </button>
+                            </form>
+                        {% endif %}
+
+                    {% else %}
+
+                        <form
+                            method="POST"
+                            action="{% url 'add_to_wishlist' product.id %}"
+                        >
+                            {% csrf_token %}
+                            <button type="submit" class="pd-wish">
+                                Add to Wishlist
+                            </button>
+                        </form>
+
+                    {% endif %}
+
+                </div>
+
+                <hr class="pd-divider">
+
+                <div class="pd-trust">
+                    <div><span>Payment</span><span>Secure transaction</span></div>
+                    <div><span>Sold by</span><span>{{ site_name }}</span></div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Reviews -->
+
+    <section id="reviews" class="rv-section">
+
+        <h2 class="rv-heading">Customer reviews</h2>
+
+        <div class="rv-layout">
+
+            <div class="rv-summary surface">
+
+                {% if product.review_count > 0 %}
+                    <div class="rv-big">
+                        <strong>{{ product.avg_rating|floatformat:1 }}</strong>
+                        <span>out of 5</span>
+                    </div>
+                    <div class="mt-2">
+                        <span class="rating">
+                            <span class="stars" aria-hidden="true"><span class="f{% widthratio product.avg_rating 5 10 %}"></span></span>
+                            <span>{{ product.review_count }} rating{{ product.review_count|pluralize }}</span>
+                        </span>
+                    </div>
+                {% else %}
+                    <div class="rv-big"><strong>&ndash;</strong><span>No ratings yet</span></div>
+                {% endif %}
+
+                <div class="mt-3">
+                    {% for row in breakdown_rows %}
+                        <div class="rv-bar-row">
+                            <span class="lbl">{{ row.star }} star</span>
+                            <div class="rv-bar" role="img" aria-label="{{ row.percent }}% of reviews are {{ row.star }} star"><i class="b{% widthratio row.percent 100 20 %}"></i></div>
+                            <span class="cnt">{{ row.count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <div>
+
+                <div class="rv-form-card surface">
+
+                    {% if user.is_authenticated %}
+
+                        <h3>{% if user_review %}Edit your review{% else %}Write a review{% endif %}</h3>
+
+                        <form method="POST" action="{% url 'submit_review' product.id %}">
+                            {% csrf_token %}
+
+                            <fieldset class="mb-3 border-0 p-0">
+                                <legend class="form-label mb-1">Your rating</legend>
+                                <div class="star-pick">
+                                    {% for n in "54321" %}
+                                        <input
+                                            type="radio"
+                                            name="rating"
+                                            id="rate-{{ n }}"
+                                            value="{{ n }}"
+                                            required
+                                            {% if user_review.rating|stringformat:"d" == n %}checked{% endif %}
+                                        >
+                                        <label for="rate-{{ n }}" title="{{ n }} star{% if n != '1' %}s{% endif %}"><span aria-hidden="true">&#9733;</span><span class="visually-hidden">{{ n }} star{% if n != '1' %}s{% endif %}</span></label>
+                                    {% endfor %}
+                                </div>
+                            </fieldset>
+
+                            <div class="mb-3">
+                                <label for="rv-title" class="form-label">Title</label>
+                                <input
+                                    type="text"
+                                    name="title"
+                                    id="rv-title"
+                                    class="form-control"
+                                    maxlength="120"
+                                    placeholder="Summarise your experience"
+                                    value="{{ user_review.title|default:'' }}"
+                                >
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="rv-comment" class="form-label">Review</label>
+                                <textarea
+                                    name="comment"
+                                    id="rv-comment"
+                                    class="form-control"
+                                    rows="4"
+                                    placeholder="What did you like or dislike?"
+                                >{{ user_review.comment|default:'' }}</textarea>
+                            </div>
+
+                            <button type="submit" class="btn-theme">
+                                {% if user_review %}Update review{% else %}Submit review{% endif %}
+                            </button>
+                        </form>
+
+                        {% if user_review %}
+                            <form
+                                method="POST"
+                                action="{% url 'delete_review' product.id %}"
+                                class="mt-2"
+                                onsubmit="return confirm('Delete your review?');"
+                            >
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete my review</button>
+                            </form>
+                        {% endif %}
+
+                    {% else %}
+
+                        <h3>Write a review</h3>
+                        <p class="text-muted mb-3">Share your thoughts with other customers.</p>
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn-theme">Sign in to review</a>
+
+                    {% endif %}
+
+                </div>
+
+                <div class="rv-list">
+
+                    {% for review in reviews %}
+                        <article class="rv-item">
+                            <div class="rv-head">
+                                <span class="rv-avatar" aria-hidden="true">{{ review.user.username|slice:":1"|upper }}</span>
+                                <span class="rv-user">{{ review.user.username }}</span>
+                                {% if review.verified %}
+                                    <span class="badge-soft badge-success-soft">Verified purchase</span>
+                                {% endif %}
+                            </div>
+                            <div class="rv-meta">
+                                <span class="rating">
+                                    <span class="stars" aria-label="{{ review.rating }} out of 5 stars"><span class="f{% widthratio review.rating 5 10 %}"></span></span>
+                                </span>
+                                <span class="rv-date">{{ review.created_at|date:"j M Y" }}</span>
+                            </div>
+                            {% if review.title %}<div class="rv-title">{{ review.title }}</div>{% endif %}
+                            {% if review.comment %}<div class="rv-text">{{ review.comment|linebreaksbr }}</div>{% endif %}
+                        </article>
+                    {% empty %}
+                        <div class="rv-empty">No reviews yet. Be the first to review this product.</div>
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Customers also viewed -->
+
+    {% if related_products %}
+        <section class="rel-section">
+            <h2 class="rel-heading">Customers also viewed</h2>
+            <div class="rel-grid">
+                {% for p in related_products %}
+                    <a href="{% url 'product_detail' p.slug %}" class="rel-card">
+                        {% if p.image %}
+                            <img src="{{ p.image.url }}" alt="{{ p.name }}" class="rel-img" loading="lazy">
+                        {% else %}
+                            <div class="rel-img">No image</div>
+                        {% endif %}
+                        <div class="rel-name">{{ p.name }}</div>
+                        {% if p.review_count > 0 %}
+                            <span class="rating">
+                                <span class="stars" aria-hidden="true"><span class="f{% widthratio p.avg_rating 5 10 %}"></span></span>
+                                <span>({{ p.review_count }})</span>
+                            </span>
+                        {% endif %}
+                        <span class="az-price" style="font-size:15px"><span class="sym">₹</span><span class="amt">{{ p.price }}</span></span>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
+</div>
+
+
+<script>
+    (function () {
+        var box = document.getElementById('pd-thumbs');
+        var main = document.getElementById('pd-main-image');
+        if (!box || !main) return;
+        box.addEventListener('click', function (e) {
+            var btn = e.target.closest('.pd-thumb');
+            if (!btn) return;
+            main.src = btn.getAttribute('data-src');
+            box.querySelectorAll('.pd-thumb').forEach(function (t) { t.classList.remove('active'); });
+            btn.classList.add('active');
+        });
+    })();
+</script>
+
+
+<!-- Footer -->
+
+{% include 'partials/footer.html' %}
+
+</body>
+
+</html>
