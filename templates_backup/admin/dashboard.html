@@ -1,0 +1,1592 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Vanshuuu Store - Admin Dashboard</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f7fb;
+            font-family: Arial, sans-serif;
+            color: #1f2937;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            position: fixed;
+            width: 250px;
+            height: 100vh;
+            background: #0a0a0a;
+            left: 0;
+            top: 0;
+            padding: 25px 15px;
+            color: white;
+        }
+
+        .logo {
+            padding: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #262626;
+        }
+
+        .logo h3 {
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .logo small {
+            color: #9ca3af;
+        }
+
+        .menu-title {
+            color: #6b7280;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin: 20px 10px 8px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #d1d5db;
+            text-decoration: none;
+            padding: 12px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: #dc2626;
+            color: white;
+        }
+
+        /* MAIN */
+
+        .main {
+            margin-left: 250px;
+            min-height: 100vh;
+        }
+
+        /* TOPBAR */
+
+        .topbar {
+            height: 70px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+
+        .topbar h5 {
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .topbar small {
+            color: #6b7280;
+        }
+
+        .admin {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #dc2626;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* CONTENT */
+
+        .content {
+            padding: 30px;
+        }
+
+        .heading {
+            margin-bottom: 25px;
+        }
+
+        .heading h2 {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .heading p {
+            color: #6b7280;
+            margin: 0;
+        }
+
+        /* CARDS */
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 22px;
+            height: 100%;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+        }
+
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .blue {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .green {
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        .purple {
+            background: #f5f3ff;
+            color: #7c3aed;
+        }
+
+        .orange {
+            background: #fff7ed;
+            color: #ea580c;
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .stat-card p {
+            color: #6b7280;
+            margin: 5px 0 0;
+            font-size: 14px;
+        }
+
+        /* CHART CARD */
+
+        .dashboard-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            height: 100%;
+        }
+
+        .card-header-custom {
+            margin-bottom: 15px;
+        }
+
+        .card-header-custom h5 {
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .card-header-custom small {
+            color: #6b7280;
+        }
+
+        .chart-box {
+            position: relative;
+            height: 330px;
+        }
+
+        /* PANEL */
+
+        .panel {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            margin-top: 25px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h5 {
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .panel-header a {
+            text-decoration: none;
+            color: #dc2626;
+            font-size: 13px;
+        }
+
+        .panel-body {
+            padding: 20px;
+        }
+
+        /* TABLE */
+
+        .table {
+            margin: 0;
+        }
+
+        .table th {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table td {
+            font-size: 13px;
+            padding: 15px 12px;
+        }
+
+        /* STATUS */
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .pending {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .processing {
+            background: #f3f4f6;
+            color: #262626;
+        }
+
+        .shipped {
+            background: #f5f3ff;
+            color: #6d28d9;
+        }
+
+        .delivered {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .cancelled {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        /* STATUS BOX */
+
+        .status-box {
+            padding: 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .status-box:last-child {
+            border-bottom: none;
+        }
+
+        .status-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        /* PRODUCT */
+
+        .product-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .product-row:last-child {
+            border-bottom: none;
+        }
+
+        .product-icon {
+            width: 40px;
+            height: 40px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .product-name {
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .product-small {
+            color: #9ca3af;
+            font-size: 11px;
+        }
+
+        /* QUICK ACTION */
+
+        .action {
+            display: block;
+            text-decoration: none;
+            color: #1f2937;
+            border: 1px solid #e5e7eb;
+            padding: 18px;
+            border-radius: 10px;
+            background: white;
+        }
+
+        .action:hover {
+            border-color: #dc2626;
+            color: #dc2626;
+        }
+
+        .action i {
+            font-size: 22px;
+        }
+
+        .action strong {
+            display: block;
+            margin-top: 10px;
+        }
+
+        .action small {
+            color: #9ca3af;
+        }
+
+        /* MOBILE */
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            background: none;
+            border: 0;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: 0;
+            font-size: 28px;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .sidebar-backdrop {
+            display: none;
+        }
+
+        @media (max-width: 992px) {
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.25s;
+                z-index: 1050;
+                overflow-y: auto;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-backdrop.show {
+                display: block;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.4);
+                z-index: 1040;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .topbar {
+                padding: 0 20px;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- SIDEBAR -->
+
+<div class="sidebar" id="sidebar">
+
+    <div class="logo">
+        <h3>VANSHUUU</h3>
+        <small>STORE ADMIN</small>
+    </div>
+
+    <div class="menu-title">Main Menu</div>
+
+    <a href="{% url 'admin_dashboard' %}" class="active">
+        <i class="bi bi-grid"></i> Dashboard
+    </a>
+
+    <a href="{% url 'admin:app_product_changelist' %}">
+        <i class="bi bi-box"></i> Products
+    </a>
+
+    <a href="{% url 'admin:app_category_changelist' %}">
+        <i class="bi bi-tags"></i> Categories
+    </a>
+
+    <a href="{% url 'admin:app_order_changelist' %}">
+        <i class="bi bi-bag"></i> Orders
+    </a>
+
+    <div class="menu-title">Customers</div>
+
+    <a href="{% url 'admin:auth_user_changelist' %}">
+        <i class="bi bi-people"></i> Customers
+    </a>
+
+    <a href="{% url 'admin:app_wishlist_changelist' %}">
+        <i class="bi bi-heart"></i> Wishlist
+    </a>
+
+    <div class="menu-title">System</div>
+
+    <a href="{% url 'admin:index' %}">
+        <i class="bi bi-gear"></i> Django Admin
+    </a>
+
+    <a href="{% url 'home' %}">
+        <i class="bi bi-shop"></i> View Store
+    </a>
+
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="logout-btn">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </button>
+    </form>
+
+</div>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+
+
+<!-- MAIN -->
+
+<div class="main">
+
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+        <div class="d-flex align-items-center gap-3">
+
+            <button type="button" class="menu-toggle" id="menuToggle" aria-label="Open menu">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div>
+                <h5>Admin Dashboard</h5>
+                <small>Store management overview</small>
+            </div>
+
+        </div>
+
+
+        <div class="admin">
+
+            <div class="avatar">
+                {{ request.user.username|slice:":1"|upper }}
+            </div>
+
+            <div>
+                <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+                <br>
+                <small>{% if request.user.is_superuser %}Superuser{% else %}Staff{% endif %}</small>
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- CONTENT -->
+
+    <div class="content">
+
+
+        <!-- HEADING -->
+
+        <div class="heading">
+
+            <h2>
+                Dashboard Overview
+            </h2>
+
+            <p>
+                Welcome to Vanshuuu Store management system.
+            </p>
+
+        </div>
+
+
+
+        <!-- STAT CARDS -->
+
+        <div class="row g-4">
+
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon blue">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+
+                    <h3>
+                        {{ total_products }}
+                    </h3>
+
+                    <p>
+                        Total Products
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon green">
+                        <i class="bi bi-bag-check"></i>
+                    </div>
+
+                    <h3>
+                        {{ total_orders }}
+                    </h3>
+
+                    <p>
+                        Total Orders
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon purple">
+                        <i class="bi bi-people"></i>
+                    </div>
+
+                    <h3>
+                        {{ total_customers }}
+                    </h3>
+
+                    <p>
+                        Total Customers
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon orange">
+                        <i class="bi bi-currency-rupee"></i>
+                    </div>
+
+                    <h3>
+                        ₹{{ total_revenue }}
+                    </h3>
+
+                    <p>
+                        Total Revenue
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon blue">
+                        <i class="bi bi-tags"></i>
+                    </div>
+
+                    <h3>
+                        {{ total_categories }}
+                    </h3>
+
+                    <p>
+                        Total Categories
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon green">
+                        <i class="bi bi-heart"></i>
+                    </div>
+
+                    <h3>
+                        {{ total_wishlist }}
+                    </h3>
+
+                    <p>
+                        Wishlist Items
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+<!-- =====================================================
+     BUSINESS PERFORMANCE
+===================================================== -->
+
+<div class="row g-4 mt-1">
+
+
+    <!-- TODAY -->
+
+    <div class="col-lg-4">
+
+        <div class="stat-card">
+
+            <div class="stat-icon blue">
+                <i class="bi bi-calendar-day"></i>
+            </div>
+
+            <h3>
+                ₹{{ today_revenue }}
+            </h3>
+
+            <p>
+                Today's Revenue
+            </p>
+
+            <small class="text-muted">
+                {{ today_orders }} orders today
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <!-- WEEK -->
+
+    <div class="col-lg-4">
+
+        <div class="stat-card">
+
+            <div class="stat-icon green">
+                <i class="bi bi-calendar-week"></i>
+            </div>
+
+            <h3>
+                ₹{{ week_revenue }}
+            </h3>
+
+            <p>
+                This Week Revenue
+            </p>
+
+            <small class="text-muted">
+                {{ week_orders }} orders this week
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <!-- MONTH -->
+
+    <div class="col-lg-4">
+
+        <div class="stat-card">
+
+            <div class="stat-icon purple">
+                <i class="bi bi-calendar-month"></i>
+            </div>
+
+            <h3>
+                ₹{{ month_revenue }}
+            </h3>
+
+            <p>
+                This Month Revenue
+            </p>
+
+            <small class="text-muted">
+                {{ month_orders }} orders this month
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+        <!-- ANALYTICS SECTION -->
+
+        <div class="row g-4 mt-1">
+
+            <div class="col-lg-8">
+
+                <div class="dashboard-card">
+
+                    <div class="card-header-custom">
+                        <h5>Sales Analytics</h5>
+                        <small>Last 7 days performance</small>
+                    </div>
+
+                    <div class="chart-box">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-4">
+
+                <div class="dashboard-card">
+
+                    <div class="card-header-custom">
+                        <h5>Order Status</h5>
+                        <small>Current order distribution</small>
+                    </div>
+
+                    <div class="chart-box">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RECENT ORDERS -->
+
+        <div class="row">
+
+
+            <div class="col-lg-12">
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <h5>
+                            Recent Orders
+                        </h5>
+
+                        <a href="{% url 'admin:app_order_changelist' %}">
+                            View All
+                        </a>
+
+                    </div>
+
+
+                    <div class="table-responsive">
+
+                        <table class="table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Order
+                                    </th>
+
+                                    <th>
+                                        Customer
+                                    </th>
+
+                                    <th>
+                                        Amount
+                                    </th>
+
+                                    <th>
+                                        Payment
+                                    </th>
+
+                                    <th>
+                                        Status
+                                    </th>
+
+                                    <th>
+                                        Date
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                {% for order in recent_orders %}
+
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            #{{ order.id }}
+                                        </strong>
+                                    </td>
+
+
+                                    <td>
+                                        {{ order.full_name }}
+                                    </td>
+
+
+                                    <td>
+                                        ₹{{ order.total_amount }}
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if order.payment_status == "Paid" %}
+
+                                        <span class="status delivered">
+                                            Paid
+                                        </span>
+
+                                        {% elif order.payment_status == "Failed" %}
+
+                                        <span class="status cancelled">
+                                            Failed
+                                        </span>
+
+                                        {% else %}
+
+                                        <span class="status pending">
+                                            Pending
+                                        </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if order.status == "Pending" %}
+
+                                        <span class="status pending">
+                                            Pending
+                                        </span>
+
+                                        {% elif order.status == "Processing" %}
+
+                                        <span class="status processing">
+                                            Processing
+                                        </span>
+
+                                        {% elif order.status == "Shipped" %}
+
+                                        <span class="status shipped">
+                                            Shipped
+                                        </span>
+
+                                        {% elif order.status == "Delivered" %}
+
+                                        <span class="status delivered">
+                                            Delivered
+                                        </span>
+
+                                        {% else %}
+
+                                        <span class="status cancelled">
+                                            Cancelled
+                                        </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+                                        {{ order.created_at|date:"d M Y" }}
+                                    </td>
+
+                                </tr>
+
+
+                                {% empty %}
+
+                                <tr>
+
+                                    <td colspan="6" class="text-center">
+
+                                        No orders available.
+
+                                    </td>
+
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- PRODUCTS -->
+
+        <div class="row">
+
+
+            <!-- TOP PRODUCTS -->
+
+            <div class="col-lg-6">
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <h5>
+                            Top Selling Products
+                        </h5>
+
+                        <a href="{% url 'admin:app_product_changelist' %}">
+                            Products
+                        </a>
+
+                    </div>
+
+
+                    <div class="panel-body">
+
+                        {% for product in top_products %}
+
+                        <div class="product-row">
+
+                            <div class="product-info">
+
+                                <div class="product-icon">
+
+                                    <i class="bi bi-box"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <div class="product-name">
+                                        {{ product.product__name }}
+                                    </div>
+
+                                    <div class="product-small">
+                                        Product sales
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <strong>
+                                {{ product.total_sold }} sold
+                            </strong>
+
+                        </div>
+
+                        {% empty %}
+
+                        <p class="text-muted">
+                            No sales available.
+                        </p>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- LOW STOCK -->
+
+            <div class="col-lg-6">
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <h5>
+                            Low Stock Products
+                        </h5>
+
+                        <a href="{% url 'admin:app_product_changelist' %}">
+                            Manage
+                        </a>
+
+                    </div>
+
+
+                    <div class="panel-body">
+
+                        {% for product in low_stock_products %}
+
+                        <div class="product-row">
+
+                            <div class="product-info">
+
+                                <div class="product-icon">
+
+                                    <i class="bi bi-exclamation-triangle"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <div class="product-name">
+                                        {{ product.name }}
+                                    </div>
+
+                                    <div class="product-small">
+                                        {{ product.category.name }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <strong class="text-danger">
+
+                                {{ product.stock }} left
+
+                            </strong>
+
+                        </div>
+
+
+                        {% empty %}
+
+                        <div class="text-center">
+
+                            <i
+                                class="bi bi-check-circle text-success"
+                                style="font-size: 35px;"
+                            ></i>
+
+                            <p class="mt-2">
+                                No low-stock products.
+                            </p>
+
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- PAYMENT -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <h5>
+                    Payment Overview
+                </h5>
+
+            </div>
+
+
+            <div class="panel-body">
+
+                <div class="row g-4 align-items-center">
+
+                    <div class="col-lg-7">
+
+                <div class="row g-3">
+
+
+                    <div class="col-md-4">
+
+                        <div class="action">
+
+                            <i class="bi bi-check-circle text-success"></i>
+
+                            <strong>
+                                {{ paid_orders }} Paid Orders
+                            </strong>
+
+                            <small>
+                                Successful payments
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="action">
+
+                            <i class="bi bi-clock text-warning"></i>
+
+                            <strong>
+                                {{ pending_payments }} Pending
+                            </strong>
+
+                            <small>
+                                Payments waiting
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="action">
+
+                            <i class="bi bi-x-circle text-danger"></i>
+
+                            <strong>
+                                {{ failed_payments }} Failed
+                            </strong>
+
+                            <small>
+                                Failed payments
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div style="position: relative; height: 220px;">
+                            <canvas id="paymentChart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- QUICK ACTIONS -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <h5>
+                    Quick Actions
+                </h5>
+
+            </div>
+
+
+            <div class="panel-body">
+
+                <div class="row g-3">
+
+
+                    <div class="col-md-3">
+
+                        <a
+                            href="{% url 'admin:app_product_add' %}"
+                            class="action"
+                        >
+
+                            <i class="bi bi-plus-square text-primary"></i>
+
+                            <strong>
+                                Add Product
+                            </strong>
+
+                            <small>
+                                Create new product
+                            </small>
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <a
+                            href="{% url 'admin:app_category_add' %}"
+                            class="action"
+                        >
+
+                            <i class="bi bi-tags text-success"></i>
+
+                            <strong>
+                                Add Category
+                            </strong>
+
+                            <small>
+                                Create category
+                            </small>
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <a
+                            href="{% url 'admin:app_order_changelist' %}"
+                            class="action"
+                        >
+
+                            <i class="bi bi-bag-check text-warning"></i>
+
+                            <strong>
+                                Manage Orders
+                            </strong>
+
+                            <small>
+                                View customer orders
+                            </small>
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <a
+                            href="{% url 'home' %}"
+                            class="action"
+                        >
+
+                            <i class="bi bi-shop text-info"></i>
+
+                            <strong>
+                                View Store
+                            </strong>
+
+                            <small>
+                                Open website
+                            </small>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- FOOTER -->
+
+        <div class="text-center text-muted py-4">
+
+            <small>
+                Vanshuuu Store Admin Panel
+            </small>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+<script>
+
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+
+    function toggleSidebar() {
+        sidebar.classList.toggle('open');
+        backdrop.classList.toggle('show');
+    }
+
+    document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
+    backdrop.addEventListener('click', toggleSidebar);
+
+
+    const labels =JSON.parse('{{ sales_labels|escapejs }}');
+    const revenue = JSON.parse('{{ sales_revenue|escapejs }}');
+    const orders = JSON.parse('{{ sales_orders|escapejs }}');
+
+    const statusLabels = JSON.parse('{{ status_labels|escapejs }}');
+    const statusData = JSON.parse('{{ status_data|escapejs }}');
+
+
+    const salesCanvas = document.getElementById('salesChart');
+
+    if (salesCanvas) {
+
+        new Chart(salesCanvas, {
+
+            type: 'line',
+
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Revenue (₹)',
+                        data: revenue,
+                        borderColor: '#dc2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                        fill: true,
+                        borderWidth: 3,
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Orders',
+                        data: orders,
+                        borderColor: '#0a0a0a',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        position: 'left'
+                    },
+                    y1: {
+                        beginAtZero: true,
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        ticks: { precision: 0 }
+                    }
+                }
+            }
+
+        });
+
+    }
+
+
+    const statusCanvas = document.getElementById('orderStatusChart');
+
+    if (statusCanvas) {
+
+        new Chart(statusCanvas, {
+
+            type: 'doughnut',
+
+            data: {
+                labels: statusLabels,
+                datasets: [
+                    {
+                        data: statusData,
+                        backgroundColor: [
+                            '#f59e0b',
+                            '#262626',
+                            '#8b5cf6',
+                            '#10b981',
+                            '#ef4444'
+                        ],
+                        borderWidth: 2
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+
+        });
+
+    }
+
+    const paymentCanvas = document.getElementById('paymentChart');
+
+    if (paymentCanvas) {
+
+        new Chart(paymentCanvas, {
+
+            type: 'doughnut',
+
+            data: {
+                labels: JSON.parse('{{ payment_labels|escapejs }}'),
+                datasets: [
+                    {
+                        data: JSON.parse('{{ payment_data|escapejs }}'),
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 2
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' }
+                }
+            }
+
+        });
+
+    }
+
+</script>
+
+</body>
+</html>
+

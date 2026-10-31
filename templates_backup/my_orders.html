@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>My Orders | Vanshuuu Store</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            background:
+                radial-gradient(
+                    circle at top right,
+                    rgba(220, 38, 38, 0.18),
+                    transparent 35%
+                ),
+                #050505;
+
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+
+        /* NAVBAR */
+
+        .navbar {
+            background: rgba(8, 8, 8, 0.95) !important;
+
+            border-bottom:
+                1px solid rgba(255, 40, 40, 0.25);
+
+            box-shadow:
+                0 5px 25px rgba(255, 0, 0, 0.08);
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-size: 1.35rem;
+            letter-spacing: 1px;
+        }
+
+        .navbar-brand span {
+            color: #ff3030;
+        }
+
+        .continue-btn {
+            border: 1px solid #ff3030;
+            color: #ff4040;
+        }
+
+        .continue-btn:hover {
+            background: #e50914;
+            border-color: #e50914;
+            color: white;
+            box-shadow:
+                0 0 18px rgba(255, 0, 0, 0.4);
+        }
+
+
+        /* MAIN */
+
+        .orders-container {
+            padding-top: 50px;
+            padding-bottom: 70px;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        .page-title span {
+            color: #ff3030;
+        }
+
+        .subtitle {
+            color: #888;
+        }
+
+
+        /* ORDER CARD */
+
+        .order-card {
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(35, 35, 35, 0.96),
+                    rgba(10, 10, 10, 0.98)
+                );
+
+            border:
+                1px solid rgba(255, 40, 40, 0.18);
+
+            border-radius: 18px;
+
+            color: white;
+
+            transition: 0.35s;
+
+            box-shadow:
+                0 10px 35px rgba(0, 0, 0, 0.55);
+        }
+
+        .order-card:hover {
+            transform: translateY(-4px);
+
+            border-color:
+                rgba(255, 40, 40, 0.5);
+
+            box-shadow:
+                0 18px 45px rgba(0, 0, 0, 0.7),
+                0 0 25px rgba(255, 0, 0, 0.08);
+        }
+
+
+        /* LABELS */
+
+        .order-label {
+            color: #777;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .order-id {
+            color: white;
+            font-weight: 800;
+        }
+
+        .order-date {
+            color: #ccc;
+        }
+
+        .order-price {
+            color: #ff4141;
+            font-weight: 800;
+        }
+
+
+        /* STATUS */
+
+        .status {
+            font-size: 12px;
+            padding: 8px 13px;
+            border-radius: 20px;
+            font-weight: 700;
+            border: 1px solid transparent;
+        }
+
+        .status-delivered {
+            background: rgba(25, 135, 84, 0.15);
+            color: #4ade80;
+            border-color: rgba(74, 222, 128, 0.25);
+        }
+
+        .status-cancelled {
+            background: rgba(220, 38, 38, 0.15);
+            color: #ff5555;
+            border-color: rgba(255, 50, 50, 0.3);
+        }
+
+        .status-shipped {
+            background: rgba(13, 110, 253, 0.15);
+            color: #60a5fa;
+            border-color: rgba(96, 165, 250, 0.25);
+        }
+
+        .status-processing {
+            background: rgba(255, 193, 7, 0.12);
+            color: #facc15;
+            border-color: rgba(250, 204, 21, 0.25);
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.12);
+            color: #facc15;
+            border-color: rgba(250, 204, 21, 0.25);
+        }
+
+
+        /* VIEW ORDER */
+
+        .view-btn {
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff3030,
+                    #b30000
+                );
+
+            border: none;
+
+            color: white;
+
+            font-weight: 700;
+
+            padding: 9px 18px;
+
+            border-radius: 9px;
+
+            transition: 0.3s;
+        }
+
+        .view-btn:hover {
+            color: white;
+
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 0 20px rgba(255, 0, 0, 0.35);
+        }
+
+
+        /* EMPTY ORDERS */
+
+        .empty-orders {
+            padding: 80px 20px;
+
+            text-align: center;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(30, 30, 30, 0.85),
+                    rgba(8, 8, 8, 0.95)
+                );
+
+            border:
+                1px solid rgba(255, 40, 40, 0.2);
+
+            border-radius: 24px;
+
+            box-shadow:
+                0 15px 45px rgba(0, 0, 0, 0.5);
+        }
+
+        .empty-icon {
+            font-size: 70px;
+
+            filter:
+                drop-shadow(
+                    0 0 15px rgba(255, 0, 0, 0.3)
+                );
+        }
+
+        .empty-orders h3 {
+            font-weight: 800;
+        }
+
+        .empty-orders p {
+            color: #888;
+        }
+
+        .shopping-btn {
+            background: #e50914;
+            border: none;
+            color: white;
+            font-weight: 700;
+            padding: 11px 24px;
+            border-radius: 10px;
+        }
+
+        .shopping-btn:hover {
+            background: #ff3030;
+            color: white;
+
+            box-shadow:
+                0 0 20px rgba(255, 0, 0, 0.3);
+        }
+
+
+        /* FOOTER */
+
+        footer {
+            background: #080808;
+
+            border-top:
+                1px solid rgba(255, 40, 40, 0.15);
+
+            color: #777;
+        }
+
+        footer span {
+            color: #e50914;
+        }
+
+
+        /* MOBILE */
+
+        @media (max-width: 768px) {
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .order-card {
+                margin-bottom: 18px;
+            }
+
+            .view-btn {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- NAVBAR -->
+
+<nav class="navbar navbar-dark">
+
+    <div class="container py-2">
+
+        <a
+            class="navbar-brand fw-bold"
+            href="{% url 'home' %}"
+        >
+            🛍️ Vanshuuu <span>Store</span>
+        </a>
+
+
+        <a
+            href="{% url 'home' %}"
+            class="btn continue-btn btn-sm"
+        >
+            ← Continue Shopping
+        </a>
+
+    </div>
+
+</nav>
+
+
+<!-- MAIN -->
+
+<div class="container orders-container">
+
+
+    <div class="mb-4">
+
+        <h1 class="page-title mb-1">
+            My <span>Orders</span>
+        </h1>
+
+        <p class="subtitle mb-0">
+            Track and manage your orders
+        </p>
+
+    </div>
+
+
+    {% if orders %}
+
+
+        {% for order in orders %}
+
+
+            <div class="order-card mb-3">
+
+                <div class="card-body p-4">
+
+                    <div class="row align-items-center g-3">
+
+
+                        <!-- ORDER ID -->
+
+                        <div class="col-md-3">
+
+                            <small class="order-label">
+                                Order
+                            </small>
+
+                            <h5 class="order-id mb-0">
+                                #{{ order.id }}
+                            </h5>
+
+                        </div>
+
+
+                        <!-- DATE -->
+
+                        <div class="col-md-3">
+
+                            <small class="order-label">
+                                Date
+                            </small>
+
+                            <p class="order-date mb-0 mt-1">
+                                {{ order.created_at|date:"d M Y" }}
+                            </p>
+
+                        </div>
+
+
+                        <!-- AMOUNT -->
+
+                        <div class="col-md-2">
+
+                            <small class="order-label">
+                                Total
+                            </small>
+
+                            <p class="order-price mb-0 mt-1">
+                                ₹{{ order.total_amount }}
+                            </p>
+
+                        </div>
+
+
+                        <!-- STATUS -->
+
+                        <div class="col-md-2">
+
+                            <small class="order-label d-block mb-2">
+                                Status
+                            </small>
+
+
+                            {% if order.status == "Delivered" %}
+
+                                <span class="status status-delivered">
+                                    ✓ Delivered
+                                </span>
+
+
+                            {% elif order.status == "Cancelled" %}
+
+                                <span class="status status-cancelled">
+                                    ✕ Cancelled
+                                </span>
+
+
+                            {% elif order.status == "Shipped" %}
+
+                                <span class="status status-shipped">
+                                    🚚 Shipped
+                                </span>
+
+
+                            {% elif order.status == "Processing" %}
+
+                                <span class="status status-processing">
+                                    ⚙ Processing
+                                </span>
+
+
+                            {% else %}
+
+                                <span class="status status-pending">
+                                    ⏳ Pending
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- VIEW ORDER -->
+
+                        <div class="col-md-2 text-md-end">
+
+                            <a
+                                href="{% url 'order_detail' order.id %}"
+                                class="btn view-btn"
+                            >
+                                View Order →
+                            </a>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        {% endfor %}
+
+
+    {% else %}
+
+
+        <!-- EMPTY -->
+
+        <div class="empty-orders">
+
+            <div class="empty-icon">
+                📦
+            </div>
+
+            <h3 class="mt-3">
+                No Orders Yet
+            </h3>
+
+            <p>
+                Your placed orders will appear here.
+            </p>
+
+            <a
+                href="{% url 'home' %}"
+                class="btn shopping-btn mt-2"
+            >
+                🛍️ Start Shopping
+            </a>
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+<!-- FOOTER -->
+
+<footer class="text-center py-4">
+
+    <p class="mb-0">
+        © 2026 Vanshuuu <span>Store</span> • All Rights Reserved
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>

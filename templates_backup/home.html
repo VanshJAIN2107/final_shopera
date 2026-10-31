@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Vanshuuu Store | Shop Smart</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Google Font -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        /* =====================================================
+           GLOBAL
+        ===================================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+
+            color: #ffffff;
+
+            background:
+                radial-gradient(
+                    circle at 10% 10%,
+                    rgba(220, 38, 38, 0.12),
+                    transparent 28%
+                ),
+                radial-gradient(
+                    circle at 90% 25%,
+                    rgba(127, 29, 29, 0.12),
+                    transparent 30%
+                ),
+                #050505;
+
+            overflow-x: hidden;
+        }
+
+        ::selection {
+            background: #dc2626;
+            color: white;
+        }
+
+
+        /* =====================================================
+           NAVBAR
+        ===================================================== */
+
+        .navbar {
+            padding: 16px 0;
+
+            background: rgba(0, 0, 0, 0.82) !important;
+
+            backdrop-filter: blur(20px);
+
+            border-bottom:
+                1px solid rgba(255, 0, 0, 0.12);
+
+            position: sticky;
+            top: 0;
+
+            z-index: 999;
+        }
+
+        .brand {
+            font-size: 27px;
+            font-weight: 900;
+
+            letter-spacing: -1px;
+
+            color: #ffffff !important;
+        }
+
+        .brand span {
+            color: #ef4444;
+        }
+
+        .nav-link {
+            color: #d4d4d4 !important;
+
+            font-weight: 600;
+
+            margin-left: 12px;
+
+            transition: 0.25s;
+        }
+
+        .nav-link:hover {
+            color: #ff3b3b !important;
+
+            transform: translateY(-2px);
+        }
+
+        .account-btn {
+            border:
+                1px solid rgba(255,255,255,.12);
+
+            background:
+                rgba(255,255,255,.05);
+
+            border-radius: 12px;
+
+            padding: 8px 13px !important;
+        }
+
+        .create-btn {
+            border: none;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ef4444,
+                    #991b1b
+                );
+
+            color: white !important;
+
+            border-radius: 10px;
+
+            font-weight: 700;
+
+            transition: .3s;
+        }
+
+        .create-btn:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 8px 25px
+                rgba(220,38,38,.35);
+        }
+
+
+        /* =====================================================
+           HERO
+        ===================================================== */
+
+        .hero {
+
+            min-height: 570px;
+
+            margin-top: 35px;
+
+            border-radius: 32px;
+
+            position: relative;
+
+            overflow: hidden;
+
+            display: flex;
+
+            align-items: center;
+
+            padding: 70px;
+
+            background:
+                linear-gradient(
+                    120deg,
+                    #050505 0%,
+                    #0e0e0e 45%,
+                    #1b0505 100%
+                );
+
+            border:
+                1px solid
+                rgba(255, 0, 0, .18);
+
+            box-shadow:
+
+                0 30px 90px
+                rgba(0,0,0,.7),
+
+                0 0 50px
+                rgba(220,38,38,.07),
+
+                inset 0 1px
+                rgba(255,255,255,.06);
+        }
+
+
+        /* glowing background */
+
+        .hero::before {
+
+            content: "";
+
+            position: absolute;
+
+            width: 500px;
+            height: 500px;
+
+            right: -150px;
+            top: -150px;
+
+            border-radius: 50%;
+
+            background: #dc2626;
+
+            filter: blur(140px);
+
+            opacity: .20;
+        }
+
+        .hero::after {
+
+            content: "";
+
+            position: absolute;
+
+            width: 350px;
+            height: 350px;
+
+            left: 35%;
+            bottom: -220px;
+
+            border-radius: 50%;
+
+            background: #991b1b;
+
+            filter: blur(110px);
+
+            opacity: .20;
+        }
+
+
+        .hero-content {
+
+            position: relative;
+
+            z-index: 10;
+
+            max-width: 620px;
+        }
+
+
+        /* badge */
+
+        .new-badge {
+
+            display: inline-block;
+
+            padding: 9px 17px;
+
+            border-radius: 50px;
+
+            background:
+                rgba(255,0,0,.07);
+
+            border:
+                1px solid
+                rgba(255,60,60,.28);
+
+            color: #ff6b6b;
+
+            font-size: 13px;
+
+            font-weight: 800;
+
+            letter-spacing: .5px;
+
+            box-shadow:
+                0 0 20px
+                rgba(255,0,0,.08);
+        }
+
+
+        /* heading */
+
+        .hero h1 {
+
+            font-size:
+                clamp(45px, 6vw, 76px);
+
+            line-height: .98;
+
+            font-weight: 900;
+
+            letter-spacing: -4px;
+
+            margin-top: 22px;
+
+            margin-bottom: 0;
+        }
+
+
+        .gradient-text {
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #ffffff,
+                    #ff5555,
+                    #dc2626
+                );
+
+            -webkit-background-clip: text;
+            background-clip: text;
+
+            -webkit-text-fill-color:
+                transparent;
+        }
+
+
+        .hero p {
+
+            color: #a3a3a3;
+
+            font-size: 17px;
+
+            line-height: 1.7;
+
+            margin-top: 25px;
+
+            max-width: 530px;
+        }
+
+
+        /* =====================================================
+           HERO BUTTON
+        ===================================================== */
+
+        .shop-btn {
+
+            display: inline-block;
+
+            margin-top: 15px;
+
+            padding: 14px 30px;
+
+            border-radius: 12px;
+
+            border: none;
+
+            font-weight: 800;
+
+            text-decoration: none;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff3030,
+                    #991b1b
+                );
+
+            color: white;
+
+            box-shadow:
+                0 10px 30px
+                rgba(220,38,38,.25);
+
+            transition: .3s;
+        }
+
+        .shop-btn:hover {
+
+            color: white;
+
+            transform:
+                translateY(-4px)
+                scale(1.03);
+
+            box-shadow:
+                0 15px 45px
+                rgba(220,38,38,.45);
+        }
+
+
+        /* =====================================================
+           3D CUBE
+        ===================================================== */
+
+        .scene {
+
+            position: absolute;
+
+            right: 5%;
+
+            width: 390px;
+            height: 390px;
+
+            perspective: 1000px;
+
+            z-index: 5;
+        }
+
+
+        .cube {
+
+            position: absolute;
+
+            width: 230px;
+            height: 230px;
+
+            left: 80px;
+            top: 80px;
+
+            transform-style:
+                preserve-3d;
+
+            animation:
+                rotateCube 12s
+                infinite linear;
+        }
+
+
+        .cube div {
+
+            position: absolute;
+
+            width: 230px;
+            height: 230px;
+
+            border:
+                1px solid
+                rgba(255,70,70,.35);
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(220,38,38,.30),
+                    rgba(15,0,0,.75)
+                );
+
+            backdrop-filter:
+                blur(12px);
+
+            box-shadow:
+
+                inset 0 0 45px
+                rgba(255,0,0,.15),
+
+                0 0 30px
+                rgba(220,38,38,.08);
+        }
+
+
+        .front {
+            transform:
+                translateZ(115px);
+        }
+
+        .back {
+            transform:
+                rotateY(180deg)
+                translateZ(115px);
+        }
+
+        .right {
+            transform:
+                rotateY(90deg)
+                translateZ(115px);
+        }
+
+        .left {
+            transform:
+                rotateY(-90deg)
+                translateZ(115px);
+        }
+
+        .top {
+            transform:
+                rotateX(90deg)
+                translateZ(115px);
+        }
+
+        .bottom {
+            transform:
+                rotateX(-90deg)
+                translateZ(115px);
+        }
+
+
+        .cube-icon {
+
+            position: absolute;
+
+            inset: 0;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 78px;
+
+            filter:
+                drop-shadow(
+                    0 0 15px
+                    rgba(255,0,0,.55)
+                );
+        }
+
+
+        @keyframes rotateCube {
+
+            from {
+                transform:
+                    rotateX(-15deg)
+                    rotateY(0deg);
+            }
+
+            to {
+                transform:
+                    rotateX(-15deg)
+                    rotateY(360deg);
+            }
+        }
+
+
+        /* orbit */
+
+        .orbit {
+
+            position: absolute;
+
+            width: 400px;
+            height: 155px;
+
+            border:
+                1px solid
+                rgba(255,40,40,.45);
+
+            border-radius: 50%;
+
+            transform:
+                rotate(-20deg);
+
+            box-shadow:
+                0 0 20px
+                rgba(255,0,0,.15);
+
+            animation:
+                orbit 5s
+                infinite linear;
+        }
+
+
+        @keyframes orbit {
+
+            from {
+                transform:
+                    rotate(-20deg);
+            }
+
+            to {
+                transform:
+                    rotate(340deg);
+            }
+        }
+
+
+        /* =====================================================
+           SECTIONS
+        ===================================================== */
+
+        .section {
+            margin-top: 90px;
+        }
+
+        .section-title {
+
+            font-size: 32px;
+
+            font-weight: 900;
+
+            letter-spacing: -1px;
+        }
+
+        .section-subtitle {
+            color: #777;
+        }
+
+
+        /* =====================================================
+           CATEGORY
+        ===================================================== */
+
+        .category-card {
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.055),
+                    rgba(255,0,0,.025)
+                );
+
+            border:
+                1px solid
+                rgba(255,255,255,.08);
+
+            border-radius: 20px;
+
+            padding: 30px 15px;
+
+            height: 100%;
+
+            transition: .35s;
+
+            backdrop-filter:
+                blur(12px);
+        }
+
+
+        .category-card:hover {
+
+            transform: translateY(-8px);
+
+            border-color:
+                rgba(255,50,50,.5);
+
+            box-shadow:
+
+                0 20px 50px
+                rgba(0,0,0,.5),
+
+                0 0 30px
+                rgba(220,38,38,.12);
+        }
+
+
+        .category-icon {
+
+            font-size: 45px;
+
+            margin-bottom: 12px;
+
+            filter:
+                drop-shadow(
+                    0 0 10px
+                    rgba(255,0,0,.3)
+                );
+        }
+
+
+        .category-card h5 {
+            font-weight: 800;
+        }
+
+
+        /* =====================================================
+           PRODUCT CARD
+        ===================================================== */
+
+        .product-card {
+
+            height: 100%;
+
+            display: flex;
+
+            flex-direction: column;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.055),
+                    rgba(255,0,0,.025)
+                );
+
+            border:
+                1px solid
+                rgba(255,255,255,.08);
+
+            border-radius: 22px;
+
+            overflow: hidden;
+
+            transition: .4s;
+
+            backdrop-filter:
+                blur(12px);
+        }
+
+
+        .product-card:hover {
+
+            transform: translateY(-8px);
+
+            border-color:
+                rgba(255,50,50,.45);
+
+            box-shadow:
+
+                0 25px 60px
+                rgba(0,0,0,.6),
+
+                0 0 35px
+                rgba(220,38,38,.12);
+        }
+
+
+        .image-box {
+
+            overflow: hidden;
+
+            position: relative;
+        }
+
+
+        .product-image {
+
+            height: 245px;
+
+            width: 100%;
+
+            object-fit: cover;
+
+            display: block;
+
+            background: #111;
+
+            transition: .5s;
+        }
+
+
+        .product-card:hover
+        .product-image {
+
+            transform:
+                scale(1.07);
+        }
+
+
+        .image-box::after {
+
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            background:
+                linear-gradient(
+                    transparent 60%,
+                    rgba(0,0,0,.5)
+                );
+
+            pointer-events: none;
+        }
+
+
+        .product-body {
+
+            padding: 20px;
+
+            flex: 1;
+
+            display: flex;
+
+            flex-direction: column;
+        }
+
+
+        .product-body .badge {
+
+            align-self: flex-start;
+        }
+
+
+        .product-name {
+
+            font-weight: 800;
+
+            font-size: 18px;
+
+            line-height: 1.3;
+
+            /* always 2 lines tall, extra text is cut with ... */
+
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+
+            min-height: calc(1.3em * 2);
+        }
+
+
+        .product-description {
+
+            color: #8a8a8a;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+
+            /* always 3 lines tall */
+
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+
+            min-height: calc(1.5em * 3);
+        }
+
+
+        .product-footer {
+
+            margin-top: auto;
+        }
+
+
+        .product-price {
+
+            font-size: 22px;
+
+            font-weight: 900;
+
+            color: white;
+        }
+
+
+        .stock {
+
+            border-radius: 30px;
+
+            padding: 6px 10px;
+        }
+
+
+        /* =====================================================
+           VIEW BUTTON
+        ===================================================== */
+
+        .view-btn {
+
+            width: 100%;
+
+            border-radius: 11px;
+
+            padding: 11px;
+
+            font-weight: 700;
+
+            border:
+                1px solid
+                rgba(255,255,255,.12);
+
+            background:
+                rgba(255,255,255,.05);
+
+            color: white;
+
+            transition: .3s;
+        }
+
+
+        .view-btn:hover {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ef4444,
+                    #991b1b
+                );
+
+            border-color:
+                #ef4444;
+
+            color: white;
+
+            box-shadow:
+                0 8px 25px
+                rgba(220,38,38,.25);
+        }
+
+
+        /* =====================================================
+           FEATURES
+        ===================================================== */
+
+        .feature {
+
+            background:
+                rgba(255,255,255,.035);
+
+            border:
+                1px solid
+                rgba(255,255,255,.07);
+
+            border-radius: 20px;
+
+            padding: 32px 15px;
+
+            transition: .3s;
+        }
+
+
+        .feature:hover {
+
+            transform:
+                translateY(-6px);
+
+            border-color:
+                rgba(255,50,50,.3);
+
+            box-shadow:
+                0 15px 40px
+                rgba(0,0,0,.4);
+        }
+
+
+        .feature-icon {
+
+            font-size: 34px;
+
+            margin-bottom: 12px;
+
+            filter:
+                drop-shadow(
+                    0 0 10px
+                    rgba(255,0,0,.3)
+                );
+        }
+
+
+        .feature h5 {
+            font-weight: 800;
+        }
+
+
+        .feature p {
+
+            color: #777;
+
+            margin: 0;
+
+            font-size: 14px;
+        }
+
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+
+        footer {
+
+            margin-top: 100px;
+
+            padding: 45px 0;
+
+            border-top:
+                1px solid
+                rgba(255,255,255,.08);
+
+            color: #666;
+        }
+
+
+        footer h5 {
+            color: white;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 900px) {
+
+            .hero {
+
+                min-height: 500px;
+
+                padding:
+                    50px 30px;
+
+                text-align: center;
+            }
+
+
+            .hero-content {
+
+                margin: auto;
+            }
+
+
+            .scene {
+                display: none;
+            }
+
+
+            .hero h1 {
+
+                letter-spacing:
+                    -2px;
+            }
+        }
+
+
+        @media (max-width: 576px) {
+
+            .hero {
+
+                margin-top: 20px;
+
+                border-radius: 24px;
+
+                min-height: 500px;
+            }
+
+
+            .section {
+                margin-top: 65px;
+            }
+
+
+            .section-title {
+                font-size: 27px;
+            }
+
+
+            .product-image {
+                height: 220px;
+            }
+
+
+            .brand {
+                font-size: 24px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+
+    <div class="container">
+
+
+        <a
+            class="navbar-brand brand"
+            href="{% url 'home' %}"
+        >
+            Vanshuuu<span>.</span>
+        </a>
+
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarMenu"
+        >
+
+            <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+
+        <div
+            class="collapse navbar-collapse"
+            id="navbarMenu"
+        >
+
+            <ul
+                class="navbar-nav ms-auto align-items-lg-center"
+            >
+
+
+                <!-- HOME -->
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link"
+                        href="{% url 'home' %}"
+                    >
+                        Home
+                    </a>
+
+                </li>
+
+
+                <!-- PRODUCTS -->
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link"
+                        href="#products"
+                    >
+                        Products
+                    </a>
+
+                </li>
+
+
+                <!-- CATEGORIES -->
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link"
+                        href="#categories"
+                    >
+                        Categories
+                    </a>
+
+                </li>
+
+
+                <!-- CART -->
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link"
+                        href="{% url 'cart' %}"
+                    >
+                        🛒 Cart
+                    </a>
+                    
+
+                </li>
+                <li class="nav-item">
+                     <a
+                       class="nav-link"
+                       href="{% url 'wishlist' %}" >
+    
+                       ❤️ Wishlist
+                     </a>
+                </li>
+
+
+                {% if user.is_authenticated %}
+
+
+                    <!-- MY ORDERS -->
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link"
+                            href="{% url 'my_orders' %}"
+                        >
+                            My Orders
+                        </a>
+
+                    </li>
+
+
+                    <!-- USER -->
+
+                    <li class="nav-item">
+
+                        <span
+                            class="nav-link account-btn"
+                        >
+                            👋 {{ user.username }}
+                        </span>
+
+                    </li>
+
+
+                    <!-- LOGOUT -->
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link text-danger"
+                            href="{% url 'logout' %}"
+                        >
+                            Logout
+                        </a>
+
+                    </li>
+
+
+                {% else %}
+
+
+                    <!-- LOGIN -->
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link"
+                            href="{% url 'login' %}"
+                        >
+                            Login
+                        </a>
+
+                    </li>
+
+
+                    <!-- REGISTER -->
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link create-btn px-3 ms-lg-2"
+                            href="{% url 'register' %}"
+                        >
+                            Create Account
+                        </a>
+
+                    </li>
+
+
+                {% endif %}
+
+
+            </ul>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<div class="container">
+
+
+    <!-- =================================================
+         HERO
+    ================================================== -->
+
+    <section class="hero">
+
+
+        <div class="hero-content">
+
+
+            <span class="new-badge">
+
+                🔥 NEW COLLECTION 2026
+
+            </span>
+
+
+            <h1>
+
+                Shop
+                <span class="gradient-text">
+                    Better.
+                </span>
+
+                <br>
+
+                Live
+                <span class="gradient-text">
+                    Better.
+                </span>
+
+            </h1>
+
+
+            <p>
+
+                Discover quality products,
+                stylish collections and amazing
+                prices — all in one place.
+
+            </p>
+
+
+            <a
+                href="#products"
+                class="shop-btn"
+            >
+
+                Explore Collection →
+
+            </a>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             3D OBJECT
+        ================================================== -->
+
+        <div class="scene">
+
+
+            <div class="orbit"></div>
+
+
+            <div class="cube">
+
+
+                <div class="front">
+
+                    <div class="cube-icon">
+                        🛍️
+                    </div>
+
+                </div>
+
+
+                <div class="back">
+
+                    <div class="cube-icon">
+                        🔥
+                    </div>
+
+                </div>
+
+
+                <div class="right">
+
+                    <div class="cube-icon">
+                        🛒
+                    </div>
+
+                </div>
+
+
+                <div class="left">
+
+                    <div class="cube-icon">
+                        💎
+                    </div>
+
+                </div>
+
+
+                <div class="top">
+
+                    <div class="cube-icon">
+                        ⭐
+                    </div>
+
+                </div>
+
+
+                <div class="bottom"></div>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         CATEGORIES
+    ================================================== -->
+
+    <section
+        id="categories"
+        class="section"
+    >
+
+
+        <div class="mb-4">
+
+            <h2 class="section-title">
+                Shop by Category
+            </h2>
+
+            <p class="section-subtitle">
+                Find exactly what you're looking for.
+            </p>
+
+        </div>
+
+
+
+        <div class="row g-4">
+
+
+            {% for category in categories %}
+
+
+                <div class="col-lg-3 col-md-4 col-sm-6">
+
+
+                    <div
+                        class="category-card text-center"
+                    >
+
+
+                        <div class="category-icon">
+
+                            🛍️
+
+                        </div>
+
+
+                        <h5>
+
+                            {{ category.name }}
+
+                        </h5>
+
+
+                          <a
+                             href="{% url 'products' %}?category={{ category.slug }}"
+                             class="btn btn-outline-danger btn-sm mt-2">
+                               Explore →
+                         </a>
+
+
+                    </div>
+
+
+                </div>
+
+
+            {% empty %}
+
+
+                <p class="text-secondary">
+
+                    No categories available.
+
+                </p>
+
+
+            {% endfor %}
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         PRODUCTS
+    ================================================== -->
+
+    <section
+        id="products"
+        class="section"
+    >
+
+
+        <div
+            class="
+                d-flex
+                justify-content-between
+                align-items-end
+                mb-4
+            "
+        >
+
+
+            <div>
+
+                <h2 class="section-title mb-1">
+
+                    Featured Products
+
+                </h2>
+
+
+                <p class="section-subtitle mb-0">
+
+                    Handpicked products for you.
+
+                </p>
+
+            </div>
+
+
+            <span class="text-secondary">
+
+                {{ products|length }} Products
+
+            </span>
+
+
+        </div>
+
+
+
+        <div class="row g-4">
+
+
+            {% for product in products %}
+
+
+                <div
+                    class="
+                        col-xl-3
+                        col-lg-4
+                        col-md-6
+                    "
+                >
+
+
+                    <div class="product-card">
+
+
+                        <!-- IMAGE -->
+
+                        <div class="image-box">
+
+
+                            {% if product.image %}
+
+
+                                <img
+                                    src="{{ product.image.url }}"
+                                    class="product-image"
+                                    alt="{{ product.name }}"
+                                >
+
+
+                            {% else %}
+
+
+                                <div
+                                    class="
+                                        product-image
+                                        d-flex
+                                        align-items-center
+                                        justify-content-center
+                                    "
+                                >
+
+                                    <span class="text-secondary">
+
+                                        No Image
+
+                                    </span>
+
+                                </div>
+
+
+                            {% endif %}
+
+
+                        </div>
+
+
+
+                        <!-- PRODUCT BODY -->
+
+                        <div class="product-body">
+
+
+                            <span
+                                class="
+                                    badge
+                                    bg-danger
+                                    mb-2
+                                "
+                            >
+
+                                {{ product.category.name }}
+
+                            </span>
+
+
+                            <h5 class="product-name">
+
+                                {{ product.name }}
+
+                            </h5>
+
+
+                            <p class="product-description">
+
+                                {{ product.description|truncatewords:12 }}
+
+                            </p>
+
+
+                            <div class="product-footer">
+
+                            <div
+                                class="
+                                    d-flex
+                                    justify-content-between
+                                    align-items-center
+                                    mb-3
+                                "
+                            >
+
+
+                                <span class="product-price">
+
+                                    ₹{{ product.price }}
+
+                                </span>
+
+
+
+                                {% if product.stock > 0 %}
+
+
+                                    <span
+                                        class="
+                                            badge
+                                            bg-success
+                                            stock
+                                        "
+                                    >
+
+                                        In Stock
+
+                                    </span>
+
+
+                                {% else %}
+
+
+                                    <span
+                                        class="
+                                            badge
+                                            bg-danger
+                                            stock
+                                        "
+                                    >
+
+                                        Sold Out
+
+                                    </span>
+
+
+                                {% endif %}
+
+
+                            </div>
+
+
+                            <a
+                                href="{% url 'product_detail' product.slug %}"
+                                class="btn view-btn"
+                            >
+
+                                View Product →
+
+                            </a>
+
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+            {% empty %}
+
+
+                <div class="col-12">
+
+                    <div
+                        class="
+                            text-center
+                            p-5
+                        "
+                    >
+
+                        <h4>
+                            No products available
+                        </h4>
+
+                        <p class="text-secondary">
+
+                            Products will appear here soon.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+            {% endfor %}
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         FEATURES
+    ================================================== -->
+
+    <section class="section">
+
+
+        <div class="row g-4">
+
+
+            <!-- DELIVERY -->
+
+            <div class="col-md-4">
+
+
+                <div class="feature text-center">
+
+
+                    <div class="feature-icon">
+
+                        🚚
+
+                    </div>
+
+
+                    <h5>
+
+                        Fast Delivery
+
+                    </h5>
+
+
+                    <p>
+
+                        Quick and reliable delivery
+                        to your doorstep.
+
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- SECURITY -->
+
+            <div class="col-md-4">
+
+
+                <div class="feature text-center">
+
+
+                    <div class="feature-icon">
+
+                        🔒
+
+                    </div>
+
+
+                    <h5>
+
+                        Secure Shopping
+
+                    </h5>
+
+
+                    <p>
+
+                        Your account and orders
+                        stay protected.
+
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- QUALITY -->
+
+            <div class="col-md-4">
+
+
+                <div class="feature text-center">
+
+
+                    <div class="feature-icon">
+
+                        💎
+
+                    </div>
+
+
+                    <h5>
+
+                        Quality Products
+
+                    </h5>
+
+
+                    <p>
+
+                        Carefully selected products
+                        at great prices.
+
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+
+
+    <div class="container text-center">
+
+
+        <h5 class="fw-bold">
+
+            Vanshuuu<span class="text-danger">.</span>
+
+        </h5>
+
+
+        <p class="mb-0">
+
+            © 2026 Vanshuuu Store.
+            Shop smart. Live better.
+
+        </p>
+
+
+    </div>
+
+
+</footer>
+
+
+
+<!-- Bootstrap JS -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
+
+</body>
+
+</html>

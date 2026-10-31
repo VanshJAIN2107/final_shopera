@@ -1,0 +1,23 @@
+2026-10-17 09:31:27,976 INFO django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-17 09:31:58,039 INFO django.utils.autoreload: C:\Users\Welcome\Desktop\vanshuuu\app\views_extra.py changed, reloading.
+2026-10-17 09:32:01,112 INFO django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-17 09:34:35,402 WARNING app.payments: Order 1 paid but stock short: ['Test Shirt (wanted 5, had 2)']
+2026-10-17 09:34:40,917 WARNING app.payments: Order 1 paid but stock short: ['Test Shirt (wanted 5, had 1)']
+2026-10-17 09:41:08,496 INFO django.utils.autoreload: C:\Users\Welcome\Desktop\vanshuuu\vanshuuu\settings.py changed, reloading.
+2026-10-17 09:41:12,555 INFO django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-17 09:41:31,108 INFO django.utils.autoreload: C:\Users\Welcome\Desktop\vanshuuu\app\forms.py changed, reloading.
+2026-10-17 09:41:33,458 INFO django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-17 09:41:59,800 WARNING app.payments: Order 1 paid but stock short: ['Test Shirt (wanted 5, had 2)']
+2026-10-17 09:42:07,276 WARNING app.payments: Order 1 paid but stock short: ['Test Shirt (wanted 5, had 1)']
+2026-10-17 09:50:58,021 INFO django.utils.autoreload: C:\Users\Welcome\Desktop\vanshuuu\app\views.py changed, reloading.
+2026-10-17 09:51:00,879 INFO django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-17 09:51:06,292 WARNING app.payments: Order 1 paid but stock short: ['Test Shirt (wanted 5, had 2)']
+2026-10-17 09:51:13,707 WARNING app.payments: Order 1 paid but stock short: ['Test Shirt (wanted 5, had 1)']
+2026-10-17 10:02:01,344 WARNING app.payments: Order 1 paid but stock short: ['Test Shirt (wanted 5, had 2)']
+2026-10-17 10:02:06,989 WARNING app.payments: Order 1 paid but stock short: ['Test Shirt (wanted 5, had 1)']
+2026-10-17 10:10:56,745 WARNING app.payments: Order 1 paid but stock short: ['Test Shirt (wanted 5, had 2)']
+2026-10-17 10:11:04,267 WARNING app.payments: Order 1 paid but stock short: ['Test Shirt (wanted 5, had 1)']
+2026-10-20 09:25:12,362 INFO django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-20 10:55:39,377 INFO django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-23 09:07:00,382 INFO django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-29 10:05:48,911 INFO django.utils.autoreload: Watching for file changes with StatReloader

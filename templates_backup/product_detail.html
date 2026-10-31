@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ product.name }} - Vanshuuu Store</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            color: #fff;
+
+            background:
+                radial-gradient(circle at 20% 20%, #3b0000 0%, transparent 35%),
+                radial-gradient(circle at 90% 80%, #250000 0%, transparent 35%),
+                #050505;
+        }
+
+        /* Navbar */
+
+        .navbar {
+            background: rgba(10, 10, 10, 0.9) !important;
+            border-bottom: 1px solid rgba(220, 38, 38, 0.35);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+        }
+
+        .navbar-brand {
+            color: #fff !important;
+            font-size: 23px;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar-brand span {
+            color: #ef4444;
+        }
+
+        /* Product section */
+
+        .product-section {
+            margin-top: 60px;
+            margin-bottom: 80px;
+        }
+
+        .image-card {
+            min-height: 500px;
+            padding: 25px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: rgba(20, 20, 20, 0.85);
+            border: 1px solid rgba(220, 38, 38, 0.35);
+            border-radius: 25px;
+
+            box-shadow:
+                0 0 30px rgba(220, 38, 38, 0.12),
+                0 20px 60px rgba(0, 0, 0, 0.6);
+
+            transition: 0.4s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-6px);
+            box-shadow:
+                0 0 40px rgba(220, 38, 38, 0.25),
+                0 25px 70px rgba(0, 0, 0, 0.7);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 450px;
+            object-fit: contain;
+            filter: drop-shadow(0 20px 20px rgba(0, 0, 0, 0.6));
+            transition: 0.4s ease;
+        }
+
+        .product-image:hover {
+            transform: scale(1.04);
+        }
+
+        .no-image {
+            width: 100%;
+            height: 400px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #111;
+            border-radius: 18px;
+            color: #777;
+        }
+
+        /* Product information */
+
+        .product-info {
+            padding: 35px;
+
+            background: rgba(18, 18, 18, 0.88);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-radius: 25px;
+
+            box-shadow:
+                0 0 30px rgba(220, 38, 38, 0.08),
+                0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .product-title {
+            font-size: 42px;
+            font-weight: 800;
+
+            background: linear-gradient(
+                90deg,
+                #ffffff,
+                #ff5555,
+                #dc2626
+            );
+
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .price {
+            color: #ff4d4d;
+            font-size: 34px;
+            font-weight: 800;
+        }
+
+        .description {
+            color: #bbb;
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        hr {
+            border-color: #333;
+        }
+
+        /* Stock */
+
+        .stock-box {
+            padding: 14px 18px;
+            margin-top: 25px;
+
+            background: rgba(22, 163, 74, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            border-radius: 12px;
+
+            color: #4ade80;
+        }
+
+        .out-stock {
+            padding: 14px 18px;
+
+            background: rgba(220, 38, 38, 0.12);
+            border: 1px solid rgba(220, 38, 38, 0.4);
+            border-radius: 12px;
+
+            color: #ff5555;
+        }
+
+        /* Quantity */
+
+        .form-label {
+            color: #ddd;
+        }
+
+        .quantity-input {
+            max-width: 120px;
+            background: #0c0c0c;
+            color: #fff;
+            border: 1px solid #444;
+        }
+
+        .quantity-input:focus {
+            background: #111;
+            color: #fff;
+            border-color: #dc2626;
+            box-shadow: 0 0 10px rgba(220, 38, 38, 0.25);
+        }
+
+        /* Buttons */
+
+        .cart-btn {
+            padding: 13px 25px;
+            border: none;
+            border-radius: 12px;
+
+            background: linear-gradient(
+                135deg,
+                #ef4444,
+                #b91c1c
+            );
+
+            color: white;
+            font-weight: 700;
+
+            box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
+
+            transition: 0.3s ease;
+        }
+
+        .cart-btn:hover {
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(220, 38, 38, 0.5);
+        }
+
+        .wishlist-btn {
+            display: inline-block;
+            padding: 13px 22px;
+
+            border: 1px solid #dc2626;
+            border-radius: 12px;
+
+            color: #ff5555;
+            text-decoration: none;
+            font-weight: 600;
+
+            transition: 0.3s ease;
+        }
+
+        .wishlist-btn:hover {
+            background: #dc2626;
+            color: #fff;
+            transform: translateY(-3px);
+        }
+
+        /* Footer */
+
+        footer {
+            background: #080808 !important;
+            border-top: 1px solid rgba(220, 38, 38, 0.3);
+            color: #777;
+        }
+
+        @media (max-width: 768px) {
+
+            .product-section {
+                margin-top: 30px;
+            }
+
+            .image-card {
+                min-height: 350px;
+            }
+
+            .product-image {
+                height: 320px;
+            }
+
+            .product-info {
+                margin-top: 25px;
+                padding: 25px;
+            }
+
+            .product-title {
+                font-size: 32px;
+            }
+
+            .price {
+                font-size: 28px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<!-- Navbar -->
+
+<nav class="navbar navbar-dark">
+
+    <div class="container">
+
+        <a
+            class="navbar-brand fw-bold"
+            href="{% url 'home' %}"
+        >
+            Vanshuuu <span>Store</span>
+        </a>
+
+        <a
+            class="btn btn-outline-light"
+            href="{% url 'home' %}"
+        >
+            Home
+        </a>
+
+    </div>
+
+</nav>
+
+
+<!-- Product -->
+
+<div class="container product-section">
+
+    <div class="row g-4">
+
+
+        <!-- Product Image -->
+
+        <div class="col-md-6">
+
+            <div class="image-card">
+
+                {% if product.image %}
+
+                    <img
+                        src="{{ product.image.url }}"
+                        alt="{{ product.name }}"
+                        class="product-image"
+                    >
+
+                {% else %}
+
+                    <div class="no-image">
+                        No Image Available
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- Product Information -->
+
+        <div class="col-md-6">
+
+            <div class="product-info">
+
+                <h1 class="product-title">
+                    {{ product.name }}
+                </h1>
+
+                <hr>
+
+                <div class="price">
+                    ₹{{ product.price }}
+                </div>
+
+                <p class="description mt-4">
+                    {{ product.description }}
+                </p>
+
+
+                <!-- Stock -->
+
+                {% if product.stock > 0 %}
+
+                    <div class="stock-box">
+                        ✓ In Stock:
+                        <strong>{{ product.stock }}</strong>
+                        available
+                    </div>
+
+                   ```html
+<form
+    method="POST"
+    action="{% url 'add_to_cart' product.id %}"
+    class="mt-4"
+>
+
+    {% csrf_token %}
+
+    <div class="mb-3">
+
+        <label
+            for="quantity"
+            class="form-label fw-semibold"
+        >
+            Quantity
+        </label>
+
+        <input
+            type="number"
+            name="quantity"
+            id="quantity"
+            class="form-control quantity-input"
+            value="1"
+            min="1"
+            max="{{ product.stock }}"
+        >
+
+    </div>
+
+
+    <div class="d-flex flex-wrap gap-3">
+
+        <!-- ADD TO CART -->
+
+        <button
+            type="submit"
+            class="cart-btn"
+        >
+            🛒 Add to Cart
+        </button>
+
+    </div>
+
+</form>
+
+
+<!-- WISHLIST -->
+
+<div class="mt-3">
+
+    {% if user.is_authenticated %}
+
+        <form
+            method="POST"
+            action="{% url 'add_to_wishlist' product.id %}"
+        >
+
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="wishlist-btn"
+            >
+                ❤️ Add to Wishlist
+            </button>
+
+        </form>
+
+    {% else %}
+
+        <a
+            href="{% url 'login' %}"
+            class="wishlist-btn"
+        >
+            ❤️ Login to Wishlist
+        </a>
+
+    {% endif %}
+
+</div>
+```
+
+                        </div>
+
+                    </form>
+
+                {% else %}
+
+                    <div class="out-stock mt-4">
+                        ✕ Out of Stock
+                    </div>
+
+                    <button
+                        class="btn btn-secondary btn-lg mt-3"
+                        disabled
+                    >
+                        Out of Stock
+                    </button>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Footer -->
+
+<footer class="text-center py-4">
+
+    <p class="mb-0">
+        © 2026 Vanshuuu Store • Premium Shopping Experience
+    </p>
+
+</footer>
+
+</body>
+
+</html>
